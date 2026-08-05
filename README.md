@@ -249,3 +249,5 @@ Route Handler와 Server Action은 인증·입력 검증 후 feature service를 �
 `.github/workflows/ci.yml`은 PostgreSQL 18 service에 최초 migration과 seed를 적용한 뒤 lint, typecheck, unit/integration test, production build를 수행합니다. 별도 smoke job은 Chromium에서 desktop/mobile Playwright 테스트를 실행합니다.
 
 상세 운영 절차는 [`docs/RUNBOOK.md`](docs/RUNBOOK.md), 확정 규칙은 [`docs/DECISIONS.md`](docs/DECISIONS.md)를 따릅니다.
+#   1  
+ 
