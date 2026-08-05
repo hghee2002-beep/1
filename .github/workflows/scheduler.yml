@@ -1,0 +1,118 @@
+name: Tournament scheduler
+
+on:
+  schedule:
+    # Offset from the top of the hour because GitHub documents higher delay there.
+    - cron: "2/5 * * * *"
+  workflow_dispatch:
+    inputs:
+      season_id:
+        description: Optional season UUID for recovery
+        required: false
+        type: string
+      participant_id:
+        description: Optional participant UUID for targeted recovery
+        required: false
+        type: string
+      limit:
+        description: Participant/batch limit (1-20)
+        required: false
+        default: "5"
+        type: string
+      force:
+        description: Ignore participant cooldown for manual recovery
+        required: false
+        default: false
+        type: boolean
+
+permissions: {}
+
+concurrency:
+  group: tournament-scheduler
+  cancel-in-progress: false
+
+jobs:
+  invoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SCHEDULER_BASE_URL: ${{ vars.SCHEDULER_BASE_URL }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      INPUT_SEASON_ID: ${{ inputs.season_id }}
+      INPUT_PARTICIPANT_ID: ${{ inputs.participant_id }}
+      INPUT_LIMIT: ${{ inputs.limit || '5' }}
+      INPUT_FORCE: ${{ inputs.force || 'false' }}
+    steps:
+      - name: Invoke bounded scheduler jobs
+        id: invoke
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${SCHEDULER_BASE_URL}" || -z "${CRON_SECRET}" ]]; then
+            echo "SCHEDULER_BASE_URL repository variable and CRON_SECRET repository secret are required." >&2
+            exit 1
+          fi
+          if ! [[ "${INPUT_LIMIT}" =~ ^([1-9]|1[0-9]|20)$ ]]; then
+            echo "limit must be an integer from 1 to 20." >&2
+            exit 1
+          fi
+
+          base_url="${SCHEDULER_BASE_URL%/}"
+          invocation_key="github:${GITHUB_RUN_ID}:${GITHUB_RUN_ATTEMPT}:sync"
+          sync_payload="$(jq -n \
+            --arg invocationKey "${invocation_key}" \
+            --arg seasonId "${INPUT_SEASON_ID}" \
+            --arg participantId "${INPUT_PARTICIPANT_ID}" \
+            --argjson limit "${INPUT_LIMIT}" \
+            --arg force "${INPUT_FORCE}" \
+            '{invocationKey: $invocationKey, limit: $limit, force: ($force == "true")}
+             + (if $seasonId == "" then {} else {seasonId: $seasonId} end)
+             + (if $participantId == "" then {} else {participantId: $participantId} end)')"
+          scoring_payload="$(jq -n \
+            --arg seasonId "${INPUT_SEASON_ID}" \
+            --argjson limit "${INPUT_LIMIT}" \
+            '{limit: $limit}
+             + (if $seasonId == "" then {} else {seasonId: $seasonId} end)')"
+          mission_payload="$(jq -n --argjson limit "${INPUT_LIMIT}" '{limit: $limit}')"
+
+          failed=0
+          invoke() {
+            local label="$1"
+            local path="$2"
+            local payload="$3"
+            local body_file
+            body_file="$(mktemp)"
+            local status
+            status="$(curl \
+              --silent \
+              --show-error \
+              --output "${body_file}" \
+              --write-out '%{http_code}' \
+              --request POST \
+              --header "Authorization: Bearer ${CRON_SECRET}" \
+              --header 'Content-Type: application/json' \
+              --header "X-Request-Id: github:${GITHUB_RUN_ID}:${GITHUB_RUN_ATTEMPT}:${label}" \
+              --data "${payload}" \
+              "${base_url}${path}")" || status="000"
+            {
+              echo "### ${label}"
+              echo
+              echo "HTTP ${status}"
+              echo
+              echo '```json'
+              jq -c . "${body_file}" 2>/dev/null || echo '{"error":"non-JSON response"}'
+              echo '```'
+            } >> "${GITHUB_STEP_SUMMARY}"
+            if [[ ! "${status}" =~ ^2 ]]; then failed=1; fi
+            rm -f "${body_file}"
+          }
+
+          invoke sync /api/scheduler/sync "${sync_payload}"
+          invoke scoring /api/scheduler/scoring "${scoring_payload}"
+          invoke missions /api/scheduler/missions "${mission_payload}"
+
+          if [[ "${failed}" -ne 0 ]]; then
+            echo "One or more scheduler endpoints failed; see the job summary." >&2
+            exit 1
+          fi

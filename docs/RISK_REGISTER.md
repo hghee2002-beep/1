@@ -1,0 +1,30 @@
+# 리스크 등록부
+
+기준일: 2026-08-04  
+상태 값: `OPEN`, `MITIGATED`, `ACCEPTED`, `CLOSED`  
+차단 값: `CODE`는 다음 구현 세션 차단, `LAUNCH`는 공개 운영 차단, `NONE`은 추적만 필요함을 뜻한다.
+
+| ID | 위험과 근거 | 가능성 | 영향 | 조기 신호 | 완화·검증 | 소유/해소 시점 | 상태·차단 |
+|---|---|---|---|---|---|---|---|
+| R-001 | Riot API 개발 키는 24시간마다 만료되고 공개 서비스에는 등록된 production key가 필요하다. 제품 등록·승인 없이 실 API 운영을 시작할 수 없다. | 높음 | 치명적 | 401/403, product 상태 미승인, 개발 키 수동 갱신 | Mock adapter를 기본으로 유지하고, 완성된 prototype·개인정보/약관·데이터 흐름으로 제품을 등록한다. staging에서 최소 3계정 read-only dry run과 key redaction을 확인한다. | 운영자 / Stage 2 전 | OPEN · LAUNCH |
+| R-002 | 패키지가 언급한 2026-08-03 커뮤니티 가이드와 Competition Visibility Form의 공식 원문을 이번 감사에서 재현하지 못했다. 공개된 Riot General Policies에는 대회 최소 20명, 공정·투명한 승리 조건, 도박 금지가 있다. | 중간 | 치명적 | 참가자 20명 미만, 적용 지역 문서 불명, 정책 URL 변경 | D-022에 따라 최소 20명을 보수적으로 적용하고 개최 직전 공식 원문 URL·확인일·결론·제출 증빙을 릴리스 기록에 남긴다. 불확실하면 이벤트 시작을 막는다. | 운영자/정책 검토자 / 개최 전 | OPEN · LAUNCH |
+| R-003 | Vercel Hobby Cron은 공식 문서상 하루 1회·시간 단위 오차라 수 분 내 경기 반영 목표를 충족하지 못한다. 실패 자동 재시도도 없다. | 확정 | 높음 | 동기화 지연, 하루 1회 이상 cron 배포 실패 | 무료 운영은 GitHub Actions 약 5분 호출+수동 복구, 안정 운영은 Pro/worker를 사용한다. 모든 모드는 같은 idempotent service와 cursor/lease를 공유한다. | 운영자 / 세션 16 | MITIGATED · LAUNCH |
+| R-004 | 같은 Riot match가 여러 참가자 sync·Cron·재시도에서 발견되어 점수·미션이 중복 정산될 수 있다. | 높음 | 치명적 | ledger 합 불일치, 중복 idempotency key, 같은 run의 processed 증가 | `Match.riotMatchId`, `SeasonMatch(seasonId,matchId)`, participant/draw/ledger/mission unique와 짧은 transaction을 둔다. 반복·동시 ingest, rollback, reconciliation integration test를 출시 게이트로 둔다. | 개발 / 세션 02·07·08·11~13 | MITIGATED · NONE |
+| R-005 | 17~23 무상 점수도 정책·국내 법률 검토 결과에 따라 chance-based 기능으로 문제될 수 있다. 잘못된 RNG mapping은 공정성도 훼손한다. | 중간 | 높음 | 정책 문의, 비균등 mapping, 구매/현금 요소 제안 | 구매·현금·베팅 표현을 금지하고 1/7 규칙을 공개한다. crypto rejection sampling과 canonical commitment vector를 테스트한다. 검토가 불명확하면 `FIXED_20`을 출시 기본으로 전환한다. | 운영자+개발 / 세션 08·17 | OPEN · LAUNCH |
+| R-006 | 실제 MVP/ACE baseline, 출처, 표본, 하위 티어 coverage가 없다. DEMO_ONLY로 보상을 지급하면 신뢰성이 깨진다. | 높음 | 높음 | baseline 미게시, demoOnly=true, stddev 0, tier bucket 누락 | production entitlement를 기본 차단한다. 검증된 CSV/JSON을 dry-run→publish하고 checksum/version을 고정한다. 미지원 티어는 D-024에 따라 `PENDING_BASELINE`이다. | 데이터 소유자 / 세션 10, Stage 2 전 | OPEN · LAUNCH |
+| R-007 | Match-V5 Challenges·Timeline 필드는 패치와 응답에 따라 생략되며 이벤트 순서·frame이 불완전할 수 있다. 이를 0/FAIL로 오인하면 미션 오판정이 발생한다. | 높음 | 높음 | timeline fetch 실패, required field 없음, PENDING_DATA backlog 증가 | 정규화 DTO와 실제 비식별 fixture를 versioning한다. `PENDING_DATA` 재시도, source 우선순위, frame fallback, purchase/sell/undo 테스트를 둔다. 광범위 실패 시 evaluator를 disable한다. | 개발/운영 / 세션 06·12·13 | MITIGATED · LAUNCH |
+| R-008 | DB UTC, 화면·주차 `Asia/Seoul`, 반개구간 경계가 어긋나면 경기·미션 귀속이 잘못된다. 브라우저 시간이 권위가 될 위험도 있다. | 중간 | 높음 | 시작/종료 정확 시각의 이중·누락, 주차 rollover 오류 | server clock과 UTC 저장을 권위로 하고 `[startAt,endAt)`을 순수 함수로 테스트한다. fake clock으로 6시간 refill·1시간 reroll·자정/주차 경계를 검증한다. | 개발 / 세션 02·07·11 | MITIGATED · NONE |
+| R-009 | 관리자 권한 누락, raw Riot payload·실명·세션·secret 노출은 개인정보와 운영권 침해로 이어진다. | 중간 | 치명적 | USER가 admin mutation 성공, 로그에 token/key, 공개 실명 무동의 | 모든 mutation에서 server guard, origin/CSRF, rate limit, schema validation을 적용한다. 실명은 opt-in(D-020), raw payload는 admin 전용, export는 마스킹/CSV injection 방어, AuditLog 삭제 금지를 검증한다. | 개발/보안 검토 / 세션 04·15·17 | MITIGATED · LAUNCH |
+| R-010 | 공개 전 PointDraw value/nonce가 DTO·로그·DB 범용 조회에 섞이면 봉인 공개의 의미와 공정성 검증이 깨진다. | 중간 | 높음 | client bundle/HTML/snapshot에 value·nonce, commitment mismatch | 공개/비공개 DTO를 분리하고 nonce 필드를 일반 select에서 제외한다. canonical versioned encoding과 tamper test, secret scan, 관리자 선조회 AuditLog를 둔다. 저장 보호 방식은 세션 08 위협 모델에서 확정한다. | 개발/보안 검토 / 세션 08·17 | MITIGATED · NONE |
+| R-011 | 미션 definition/evaluator version과 경기 시작 snapshot이 불명확하면 재처리·리롤 중 진행도가 중복 또는 소급 적용될 수 있다. | 높음 | 높음 | 같은 match의 progress event 복수, current state로 과거 평가 | D-017 복합 unique, active interval snapshot, append-only correction delta, registry completeness를 적용한다. 경기 중 reroll·여러 동시 완료·새 version correction 통합 테스트를 둔다. | 개발 / 세션 11~13 | MITIGATED · NONE |
+| R-012 | production PostgreSQL provider·pool·backup이 미정이고 destructive migration/복구 리허설이 없으면 데이터 손상 후 복구할 수 없다. | 높음 | 치명적 | provider snapshot 없음, migration drift, `db push` 사용 | 세션 02는 빈 DB migration과 seed만 수행한다. provider 선정 후 pooled/direct URL을 분리하고 staging backup→migration dry run→restore rehearsal을 완료한다. production `db push`를 금지한다. | 운영자+개발 / Stage 2·세션 17 | OPEN · LAUNCH |
+| R-013 | GitHub Actions schedule은 혼잡 시 지연·누락될 수 있고 저장소 활동 상태의 영향을 받는다. 정확한 5분 SLA를 보장할 수 없다. | 중간 | 중간 | run gap, default branch workflow 비활성, queue delay | 정각을 피한 schedule, workflow_dispatch, 실패 summary, stale freshness UI, 수동 sync를 제공한다. 누락은 다음 overlap sync가 회복한다. | 운영자 / 세션 16 | OPEN · LAUNCH |
+| R-014 | 법적 문서 버전·실명 공개 동의·raw Riot 데이터 보존 기간이 없으면 동의 증명과 삭제 요청 처리가 불가능하다. | 높음 | 높음 | 동의 version 없음, retention job 없음, 공개 실명 이의 | D-020/D-025의 opt-in과 LegalConsent를 구현한다. 운영자가 보존 기간·문의 경로·최종 문구를 확정하고 pseudonymize/export 접근을 감사한다. | 운영자/개인정보 담당 / 세션 04·15·17 | OPEN · LAUNCH |
+| R-015 | 최신 GA 패키지는 빠르게 변하며 Next 16·Prisma 7·TypeScript 7의 설정·peer dependency를 추측하면 기반이 불안정해진다. | 중간 | 중간 | peer warning, generated client/build 실패, canary 유입 | 세션 01 시작일에 npm `latest`와 공식 compatibility를 다시 확인한다. Node 24 LTS를 고정하고 exact lockfile, clean install, lint/typecheck/test/build를 통과시킨다. beta/canary를 금지한다. | 개발 / 세션 01 | MITIGATED · NONE |
+| R-016 | `MASTER_GUIDE.md`, `ALL_CODEX_PROMPTS.md`, package manifest는 생성 산출물이라 세션 00 canonical 수정과 달라졌다. 잘못된 aggregate를 실행하면 해소한 충돌이 되살아날 수 있다. | 중간 | 중간 | aggregate와 개별 docs diff, validation을 PASS로 오인 | `PACKAGE_MANIFEST.md`와 validation을 pre-audit snapshot으로 표시했다. 이후 작업은 canonical 개별 파일과 IMPLEMENTATION_PLAN을 사용하고, 생성 스크립트가 마련되면 aggregate를 재생성한다. | 개발 / 세션 01 | MITIGATED · NONE |
+
+## 출시 차단 요약
+
+- 저장소 내부 Critical/High 출시 차단은 이번 production audit에서 해소했다. R-007은 실제 Riot payload 실증, R-009는 운영 개인정보 절차 때문에 launch 추적을 유지하고 R-012는 외부 DB 준비가 필요하다.
+- 외부/운영 차단: production Riot 자격 증명과 제품 등록, 정책 원문 확인, 실제 MVP baseline, production DB·backup, 법적 문서·보존 기간, domain/hosting/scheduler 선택이 필요하다.
+- `FIXED_20`은 R-005의 안전 fallback이지 Riot product 등록, 개인정보, DB backup 같은 다른 차단 요소를 해소하지 않는다.

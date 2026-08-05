@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/deluxe_soloq_ci
+  AUTH_SECRET: ci-auth-secret-with-at-least-32-characters
+  CRON_SECRET: ci-cron-secret-with-at-least-32-characters
+  POINT_DRAW_SECRET: ci-point-draw-secret-with-at-least-32-characters
+  MOCK_RIOT_API: "true"
+  APP_URL: http://127.0.0.1:3000
+  APP_TIME_ZONE: Asia/Seoul
+  NEXT_PUBLIC_POLL_INTERVAL_MS: "20000"
+  TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/deluxe_soloq_test
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: deluxe_soloq_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d deluxe_soloq_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Unit tests
+        run: pnpm test
+      - name: Prepare isolated test database
+        run: pnpm db:test:prepare
+      - name: Integration contract tests
+        run: pnpm test:integration
+      - name: Production build
+        run: pnpm build
+
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: deluxe_soloq_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d deluxe_soloq_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Prepare isolated browser test database
+        run: pnpm db:test:prepare
+      - name: Browser smoke tests
+        run: pnpm test:e2e

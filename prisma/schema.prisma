@@ -1,0 +1,1340 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  LOCKED
+  DISABLED
+}
+
+enum ApplicationStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+  WITHDRAWN
+}
+
+enum VerificationStatus {
+  NOT_STARTED
+  PENDING
+  VERIFIED
+  FAILED
+}
+
+enum ParticipantStatus {
+  ACTIVE
+  PAUSED
+  REMOVED
+}
+
+enum Position {
+  TOP
+  JUNGLE
+  MIDDLE
+  BOTTOM
+  UTILITY
+}
+
+enum SeasonStatus {
+  DRAFT
+  SCHEDULED
+  ACTIVE
+  FINALIZING
+  COMPLETED
+  ARCHIVED
+}
+
+enum ScoringMode {
+  RANDOM_17_23
+  FIXED_20
+}
+
+enum WeekStatus {
+  SCHEDULED
+  ACTIVE
+  FINALIZING
+  COMPLETED
+}
+
+enum SeasonParticipantStatus {
+  ACTIVE
+  PAUSED
+  REMOVED
+}
+
+enum StreakType {
+  WIN
+  LOSS
+}
+
+enum SnapshotSource {
+  RIOT_API
+  MOCK
+  ADMIN_IMPORT
+}
+
+enum RankSnapshotStatus {
+  CAPTURED
+  UNRANKED
+  UNCHANGED
+  API_ERROR
+}
+
+enum MatchStatus {
+  INGESTED
+  PROCESSING
+  PROCESSED
+  INVALID
+  ERROR
+}
+
+enum DrawState {
+  SEALED
+  REVEALED
+  REROLLED
+  AUTO_REVEALED
+  VOID
+}
+
+enum ScoreLedgerType {
+  MATCH_INITIAL
+  MATCH_REROLL_ADJUSTMENT
+  ADMIN_ADJUSTMENT
+  MATCH_INVALIDATION
+  MATCH_REINSTATEMENT
+  MIGRATION_ADJUSTMENT
+}
+
+enum BaselineStatus {
+  DRAFT
+  VALIDATED
+  PUBLISHED
+  RETIRED
+  REJECTED
+}
+
+enum TierBucket {
+  PLATINUM
+  EMERALD
+  DIAMOND
+  MASTER_PLUS
+}
+
+enum MvpAward {
+  NONE
+  MVP
+  ACE
+}
+
+enum MvpEvaluationStatus {
+  COMPLETED
+  PENDING_BASELINE
+  PENDING_DATA
+  INVALID_MATCH
+}
+
+enum MissionCategory {
+  RESULT
+  COMBAT
+  DAMAGE
+  PROTECTION
+  GROWTH
+  VISION
+  OBJECTIVE
+  SURVIVAL
+  MULTIKILL
+  SPEED
+  ENDURANCE
+  TIMELINE
+  BUILD
+  POSITION
+  RUNE
+  CHAMPION
+  CUMULATIVE
+}
+
+enum MissionKind {
+  SINGLE
+  CUMULATIVE
+}
+
+enum MissionDifficulty {
+  EASY
+  NORMAL
+  HARD
+  EPIC
+}
+
+enum MissionSourceType {
+  MATCH_INFO
+  MATCH_TIMELINE
+  DATA_DRAGON
+  DERIVED
+  INTERNAL
+}
+
+enum MissionAssignmentState {
+  ACTIVE
+  COMPLETED
+  REROLLED
+  DEFERRED
+  EXPIRED
+  CANCELLED
+}
+
+enum MissionProgressEventType {
+  NORMAL
+  CORRECTION
+}
+
+enum MissionLedgerType {
+  COMPLETION
+  CORRECTION
+  ADMIN_ADJUSTMENT
+}
+
+enum MissionCandidateStatus {
+  UNSEEN
+  ACTIVE
+  COMPLETED
+  DEFERRED
+  EXHAUSTED
+}
+
+enum SyncTrigger {
+  MANUAL
+  GITHUB_SCHEDULE
+  VERCEL_CRON
+  WORKER
+  OPPORTUNISTIC
+}
+
+enum SyncRunStatus {
+  RUNNING
+  SUCCEEDED
+  PARTIAL
+  FAILED
+}
+
+enum SyncRunItemStatus {
+  RUNNING
+  SUCCEEDED
+  SKIPPED
+  FAILED
+}
+
+enum OutboxStatus {
+  PENDING
+  PROCESSING
+  PROCESSED
+  FAILED
+}
+
+enum AnnouncementStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum LegalDocumentType {
+  RULES
+  TERMS
+  PRIVACY
+  RIOT_DISCLAIMER
+}
+
+enum LegalDocumentStatus {
+  DRAFT
+  PUBLISHED
+  RETIRED
+}
+
+enum ExportJobType {
+  PARTICIPANTS
+  MATCHES
+  SCORE_LEDGER
+  MISSION_LEDGER
+  STANDINGS
+  FULL_ARCHIVE
+}
+
+enum ExportJobStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  EXPIRED
+}
+
+model User {
+  id                      String     @id @default(uuid()) @db.Uuid
+  loginId                 String     @unique @db.VarChar(64)
+  loginIdNormalized       String     @unique @db.VarChar(64)
+  realName                String     @db.VarChar(100)
+  realNamePublic          Boolean    @default(false)
+  realNamePublicConsentAt DateTime?
+  passwordHash            String
+  role                    UserRole   @default(USER)
+  status                  UserStatus @default(ACTIVE)
+  sessionVersion          Int        @default(1)
+  termsAcceptedAt         DateTime?
+  privacyAcceptedAt       DateTime?
+  createdAt               DateTime   @default(now())
+  updatedAt               DateTime   @updatedAt
+  lastLoginAt             DateTime?
+
+  authSessions            AuthSession[]
+  legalConsents           LegalConsent[]
+  applications            ParticipationApplication[] @relation("ApplicationApplicant")
+  reviewedApplications    ParticipationApplication[] @relation("ApplicationReviewer")
+  participant             Participant?               @relation("ParticipantUser")
+  approvedParticipants    Participant[]              @relation("ParticipantApprover")
+  seasonsCreated          Season[]                   @relation("SeasonCreator")
+  weekSnapshotsGenerated  WeekSnapshot[]             @relation("WeekSnapshotGenerator")
+  finalSnapshotsGenerated FinalStandingSnapshot[]    @relation("FinalSnapshotGenerator")
+  baselinesUploaded       MvpBaselineVersion[]       @relation("BaselineUploader")
+  scoreLedgerEntries      ScoreLedger[]              @relation("ScoreLedgerActor")
+  scoreReconciliations    ScoreReconciliation[]      @relation("ScoreReconciliationActor")
+  missionCorrections      MissionProgressEvent[]     @relation("MissionCorrectionActor")
+  missionLedgerEntries    MissionCompletionLedger[]  @relation("MissionLedgerActor")
+  syncRunsRequested       SyncRun[]                  @relation("SyncRequester")
+  announcementsCreated    Announcement[]             @relation("AnnouncementCreator")
+  announcementsUpdated    Announcement[]             @relation("AnnouncementUpdater")
+  legalDocumentsCreated   LegalDocument[]            @relation("LegalDocumentCreator")
+  auditLogs               AuditLog[]                 @relation("AuditActor")
+  featureFlagsUpdated     FeatureFlag[]              @relation("FeatureFlagUpdater")
+  systemSettingsUpdated   SystemSetting[]            @relation("SystemSettingUpdater")
+  exportJobsRequested     ExportJob[]                @relation("ExportRequester")
+
+  @@index([status, createdAt])
+}
+
+model AuthSession {
+  id             String    @id @default(uuid()) @db.Uuid
+  userId         String    @db.Uuid
+  jtiHash        String    @unique @db.VarChar(128)
+  sessionVersion Int
+  expiresAt      DateTime
+  revokedAt      DateTime?
+  revokeReason   String?
+  lastSeenAt     DateTime?
+  createdAt      DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@index([expiresAt])
+}
+
+model LegalConsent {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @db.Uuid
+  legalDocumentId String   @db.Uuid
+  acceptedAt      DateTime
+  source          String   @db.VarChar(64)
+  createdAt       DateTime @default(now())
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Restrict)
+  legalDocument LegalDocument @relation(fields: [legalDocumentId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, legalDocumentId])
+  @@index([legalDocumentId, acceptedAt])
+}
+
+model LoginAttempt {
+  id           String    @id @default(uuid()) @db.Uuid
+  keyHash      String    @db.VarChar(128)
+  windowStart  DateTime
+  count        Int       @default(0)
+  blockedUntil DateTime?
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([keyHash, windowStart])
+  @@index([blockedUntil])
+}
+
+model ParticipationApplication {
+  id                    String             @id @default(uuid()) @db.Uuid
+  userId                String             @db.Uuid
+  gameName              String             @db.VarChar(128)
+  tagLine               String             @db.VarChar(32)
+  riotIdNormalized      String             @db.VarChar(192)
+  puuid                 String?            @db.VarChar(128)
+  summonerId            String?            @db.VarChar(128)
+  profileIconId         Int?
+  soloTier              String?            @db.VarChar(32)
+  soloRank              String?            @db.VarChar(16)
+  soloLeaguePoints      Int?
+  primaryPosition       Position?
+  secondaryPosition     Position?
+  status                ApplicationStatus  @default(DRAFT)
+  verificationStatus    VerificationStatus @default(NOT_STARTED)
+  verificationErrorCode String?            @db.VarChar(64)
+  submittedAt           DateTime?
+  reviewedAt            DateTime?
+  reviewedById          String?            @db.Uuid
+  reviewReason          String?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+
+  user       User  @relation("ApplicationApplicant", fields: [userId], references: [id], onDelete: Restrict)
+  reviewedBy User? @relation("ApplicationReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([riotIdNormalized])
+  @@index([puuid, status])
+  @@index([status, submittedAt])
+  @@index([userId, createdAt])
+}
+
+model Participant {
+  id                 String            @id @default(uuid()) @db.Uuid
+  userId             String            @unique @db.Uuid
+  puuid              String            @unique @db.VarChar(128)
+  summonerId         String            @db.VarChar(128)
+  gameName           String            @db.VarChar(128)
+  tagLine            String            @db.VarChar(32)
+  profileIconId      Int?
+  primaryPosition    Position?
+  secondaryPosition  Position?
+  status             ParticipantStatus @default(ACTIVE)
+  approvedAt         DateTime
+  approvedById       String            @db.Uuid
+  lastIdentitySyncAt DateTime?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  user               User                         @relation("ParticipantUser", fields: [userId], references: [id], onDelete: Restrict)
+  approvedBy         User                         @relation("ParticipantApprover", fields: [approvedById], references: [id], onDelete: Restrict)
+  identityHistory    ParticipantIdentityHistory[]
+  seasonEntries      SeasonParticipant[]
+  participantWeeks   ParticipantWeek[]
+  rankSnapshots      RankSnapshot[]
+  dailySnapshots     DailyStandingSnapshot[]
+  participantMatches ParticipantMatch[]
+  syncCursor         SyncCursor?
+  syncRunItems       SyncRunItem[]
+
+  @@index([status, approvedAt])
+  @@index([gameName, tagLine])
+}
+
+model ParticipantIdentityHistory {
+  id            String    @id @default(uuid()) @db.Uuid
+  participantId String    @db.Uuid
+  gameName      String    @db.VarChar(128)
+  tagLine       String    @db.VarChar(32)
+  validFrom     DateTime
+  validTo       DateTime?
+  source        String    @db.VarChar(64)
+  createdAt     DateTime  @default(now())
+
+  participant Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@unique([participantId, validFrom])
+  @@index([participantId, validTo])
+}
+
+model Season {
+  id                     String       @id @default(uuid()) @db.Uuid
+  name                   String       @db.VarChar(100)
+  slug                   String       @unique @db.VarChar(100)
+  description            String?
+  status                 SeasonStatus @default(DRAFT)
+  timezone               String       @default("Asia/Seoul") @db.VarChar(64)
+  startAt                DateTime
+  endAt                  DateTime
+  scoringMode            ScoringMode  @default(RANDOM_17_23)
+  minGameDurationSeconds Int          @default(600)
+  autoRevealHours        Int          @default(12)
+  rulesVersion           String       @db.VarChar(64)
+  config                 Json
+  createdById            String       @db.Uuid
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
+
+  createdBy             User                   @relation("SeasonCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  weeks                 Week[]
+  participants          SeasonParticipant[]
+  rankSnapshots         RankSnapshot[]
+  syncCursors           SyncCursor[]
+  seasonMatches         SeasonMatch[]
+  finalStandingSnapshot FinalStandingSnapshot?
+
+  @@index([status, startAt, endAt])
+}
+
+model Week {
+  id                    String     @id @default(uuid()) @db.Uuid
+  seasonId              String     @db.Uuid
+  number                Int
+  name                  String     @db.VarChar(100)
+  status                WeekStatus @default(SCHEDULED)
+  startAt               DateTime
+  endAt                 DateTime
+  baselineVersionId     String?    @db.Uuid
+  missionCatalogVersion String     @db.VarChar(64)
+  rulesSnapshot         Json
+  finalizedAt           DateTime?
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+
+  season           Season                  @relation(fields: [seasonId], references: [id], onDelete: Restrict)
+  baselineVersion  MvpBaselineVersion?     @relation(fields: [baselineVersionId], references: [id], onDelete: Restrict)
+  participantWeeks ParticipantWeek[]
+  weekSnapshot     WeekSnapshot?
+  rankSnapshots    RankSnapshot[]
+  dailySnapshots   DailyStandingSnapshot[]
+  seasonMatches    SeasonMatch[]
+  exportJobs       ExportJob[]
+
+  @@unique([seasonId, number])
+  @@index([status, startAt, endAt])
+}
+
+model SeasonParticipant {
+  id                     String                  @id @default(uuid()) @db.Uuid
+  seasonId               String                  @db.Uuid
+  participantId          String                  @db.Uuid
+  status                 SeasonParticipantStatus @default(ACTIVE)
+  joinedAt               DateTime
+  leftAt                 DateTime?
+  exceptionReason        String?
+  startingRankSnapshotId String?                 @db.Uuid
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+
+  season               Season        @relation(fields: [seasonId], references: [id], onDelete: Restrict)
+  participant          Participant   @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  startingRankSnapshot RankSnapshot? @relation("StartingRankSnapshot", fields: [startingRankSnapshotId], references: [id], onDelete: SetNull)
+
+  @@unique([seasonId, participantId])
+  @@index([seasonId, status])
+}
+
+model ParticipantWeek {
+  id                   String      @id @default(uuid()) @db.Uuid
+  weekId               String      @db.Uuid
+  participantId        String      @db.Uuid
+  mainScoreCached      Int         @default(0)
+  missionScoreCached   Int         @default(0)
+  wins                 Int         @default(0)
+  losses               Int         @default(0)
+  currentStreakType    StreakType?
+  currentStreakCount   Int         @default(0)
+  bestWinStreak        Int         @default(0)
+  mvpCount             Int         @default(0)
+  aceCount             Int         @default(0)
+  rankCached           Int?
+  missionRankCached    Int?
+  lastProcessedMatchAt DateTime?
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+
+  week                    Week                      @relation(fields: [weekId], references: [id], onDelete: Restrict)
+  participant             Participant               @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  participantMatches      ParticipantMatch[]
+  scoreLedger             ScoreLedger[]
+  reconciliations         ScoreReconciliation[]
+  missionAssignments      WeeklyMissionAssignment[]
+  missionCompletionLedger MissionCompletionLedger[]
+  missionRefillState      MissionRefillState?
+  missionRerollState      MissionRerollState?
+  missionCandidateHistory MissionCandidateHistory[]
+
+  @@unique([weekId, participantId])
+  @@index([weekId, mainScoreCached, wins, losses])
+  @@index([weekId, missionScoreCached])
+}
+
+model WeekSnapshot {
+  id               String   @id @default(uuid()) @db.Uuid
+  weekId           String   @unique @db.Uuid
+  generatedAt      DateTime
+  rulesSnapshot    Json
+  standings        Json
+  missionStandings Json
+  highlights       Json
+  checksum         String   @db.VarChar(128)
+  generatedById    String?  @db.Uuid
+
+  week        Week  @relation(fields: [weekId], references: [id], onDelete: Restrict)
+  generatedBy User? @relation("WeekSnapshotGenerator", fields: [generatedById], references: [id], onDelete: SetNull)
+}
+
+model FinalStandingSnapshot {
+  id               String   @id @default(uuid()) @db.Uuid
+  seasonId         String   @unique @db.Uuid
+  generatedAt      DateTime
+  rulesSnapshot    Json
+  weekSnapshotRefs Json
+  standings        Json
+  highlights       Json
+  checksum         String   @db.VarChar(128)
+  generatedById    String?  @db.Uuid
+
+  season      Season @relation(fields: [seasonId], references: [id], onDelete: Restrict)
+  generatedBy User?  @relation("FinalSnapshotGenerator", fields: [generatedById], references: [id], onDelete: SetNull)
+}
+
+model RankSnapshot {
+  id             String             @id @default(uuid()) @db.Uuid
+  participantId  String             @db.Uuid
+  seasonId       String?            @db.Uuid
+  weekId         String?            @db.Uuid
+  capturedAt     DateTime
+  queueType      String             @db.VarChar(64)
+  tier           String?            @db.VarChar(32)
+  rank           String?            @db.VarChar(16)
+  leaguePoints   Int?
+  wins           Int?
+  losses         Int?
+  isUnranked     Boolean            @default(false)
+  displayOrdinal Int?
+  source         SnapshotSource
+  status         RankSnapshotStatus @default(CAPTURED)
+  errorCode      String?            @db.VarChar(64)
+  raw            Json?
+  createdAt      DateTime           @default(now())
+
+  participant           Participant         @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  season                Season?             @relation(fields: [seasonId], references: [id], onDelete: Restrict)
+  week                  Week?               @relation(fields: [weekId], references: [id], onDelete: Restrict)
+  startingSeasonEntries SeasonParticipant[] @relation("StartingRankSnapshot")
+
+  @@index([participantId, capturedAt])
+  @@index([weekId, capturedAt])
+  @@index([seasonId, capturedAt])
+}
+
+model DailyStandingSnapshot {
+  id            String   @id @default(uuid()) @db.Uuid
+  weekId        String   @db.Uuid
+  participantId String   @db.Uuid
+  localDate     DateTime @db.Date
+  mainScore     Int
+  rank          Int
+  wins          Int
+  losses        Int
+  tier          String?  @db.VarChar(32)
+  rankLabel     String?  @db.VarChar(16)
+  leaguePoints  Int?
+  createdAt     DateTime @default(now())
+
+  week        Week        @relation(fields: [weekId], references: [id], onDelete: Restrict)
+  participant Participant @relation(fields: [participantId], references: [id], onDelete: Restrict)
+
+  @@unique([weekId, participantId, localDate])
+  @@index([weekId, localDate, rank])
+}
+
+model Match {
+  id                String      @id @default(uuid()) @db.Uuid
+  riotMatchId       String      @unique @db.VarChar(128)
+  regionalRoute     String      @db.VarChar(32)
+  queueId           Int
+  mapId             Int
+  gameMode          String      @db.VarChar(64)
+  gameType          String      @db.VarChar(64)
+  gameVersion       String      @db.VarChar(64)
+  gameStartAt       DateTime
+  gameEndAt         DateTime
+  durationSeconds   Int
+  earlySurrender    Boolean     @default(false)
+  status            MatchStatus @default(INGESTED)
+  invalidReason     String?
+  rawSummary        Json?
+  rawTimeline       Json?
+  timelineFetchedAt DateTime?
+  ingestedAt        DateTime    @default(now())
+  processedAt       DateTime?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  seasonMatches   SeasonMatch[]
+  teams           MatchTeam[]
+  rawParticipants MatchParticipantRaw[]
+
+  @@index([gameStartAt])
+  @@index([queueId, gameStartAt])
+  @@index([status, ingestedAt])
+}
+
+model SeasonMatch {
+  id                String      @id @default(uuid()) @db.Uuid
+  seasonId          String      @db.Uuid
+  matchId           String      @db.Uuid
+  weekId            String      @db.Uuid
+  status            MatchStatus @default(INGESTED)
+  eligibilityReason String?
+  processedAt       DateTime?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  season             Season             @relation(fields: [seasonId], references: [id], onDelete: Restrict)
+  match              Match              @relation(fields: [matchId], references: [id], onDelete: Restrict)
+  week               Week               @relation(fields: [weekId], references: [id], onDelete: Restrict)
+  participantMatches ParticipantMatch[]
+  mvpEvaluations     MvpEvaluation[]
+
+  @@unique([seasonId, matchId])
+  @@index([weekId, status])
+  @@index([seasonId, status, processedAt])
+}
+
+model MatchTeam {
+  id             String  @id @default(uuid()) @db.Uuid
+  matchId        String  @db.Uuid
+  teamId         Int
+  win            Boolean
+  championKills  Int     @default(0)
+  towerKills     Int     @default(0)
+  inhibitorKills Int     @default(0)
+  dragonKills    Int     @default(0)
+  baronKills     Int     @default(0)
+  heraldKills    Int     @default(0)
+  objectives     Json
+
+  match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@unique([matchId, teamId])
+}
+
+model MatchParticipantRaw {
+  id                   String      @id @default(uuid()) @db.Uuid
+  matchId              String      @db.Uuid
+  puuid                String      @db.VarChar(128)
+  teamId               Int
+  participantIndex     Int
+  position             Position?
+  startingTier         String?     @db.VarChar(32)
+  tierBucket           TierBucket?
+  championId           Int
+  championName         String      @db.VarChar(64)
+  win                  Boolean
+  kills                Int
+  deaths               Int
+  assists              Int
+  totalMinionsKilled   Int
+  neutralMinionsKilled Int
+  goldEarned           Int
+  damageToChampions    Int
+  damageTaken          Int
+  damageMitigated      Int
+  damageToObjectives   Int
+  damageToTurrets      Int
+  visionScore          Int
+  wardsPlaced          Int
+  wardsKilled          Int
+  controlWardsPlaced   Int
+  timeCCingOthers      Int
+  healOnTeammates      Int
+  shieldOnTeammates    Int
+  items                Json
+  perks                Json
+  summonerSpells       Json
+  challenges           Json
+  normalizedMetrics    Json
+  createdAt            DateTime    @default(now())
+
+  match              Match              @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  participantMatches ParticipantMatch[]
+  mvpEvaluations     MvpEvaluation[]
+
+  @@unique([matchId, participantIndex])
+  @@index([matchId, teamId])
+  @@index([puuid, matchId])
+}
+
+model ParticipantMatch {
+  id                    String    @id @default(uuid()) @db.Uuid
+  participantId         String    @db.Uuid
+  participantWeekId     String    @db.Uuid
+  seasonMatchId         String    @db.Uuid
+  matchParticipantRawId String    @db.Uuid
+  eligible              Boolean
+  eligibilityReason     String?
+  win                   Boolean
+  position              Position?
+  championId            Int
+  championName          String    @db.VarChar(64)
+  kills                 Int
+  deaths                Int
+  assists               Int
+  cs                    Int
+  kda                   Decimal   @db.Decimal(12, 4)
+  killParticipation     Decimal?  @db.Decimal(8, 6)
+  pointSignedCached     Int?
+  processedAt           DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  participant           Participant               @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  participantWeek       ParticipantWeek           @relation(fields: [participantWeekId], references: [id], onDelete: Restrict)
+  seasonMatch           SeasonMatch               @relation(fields: [seasonMatchId], references: [id], onDelete: Restrict)
+  matchParticipantRaw   MatchParticipantRaw       @relation(fields: [matchParticipantRawId], references: [id], onDelete: Restrict)
+  pointDraw             PointDraw?
+  scoreLedger           ScoreLedger[]
+  completedAssignments  WeeklyMissionAssignment[] @relation("AssignmentCompletionMatch")
+  missionProgressEvents MissionProgressEvent[]
+  missionMatchSnapshot  MissionMatchSnapshot?
+  mvpEvaluations        MvpEvaluation[]
+
+  @@unique([participantId, seasonMatchId])
+  @@index([matchParticipantRawId])
+  @@index([participantWeekId, createdAt])
+  @@index([participantWeekId, eligible, seasonMatchId])
+  @@index([participantWeekId, seasonMatchId])
+}
+
+model PointDraw {
+  id                              String    @id @default(uuid()) @db.Uuid
+  participantMatchId              String    @unique @db.Uuid
+  state                           DrawState @default(SEALED)
+  resultSign                      Int
+  firstValue                      Int
+  firstNonceEncryptedOrProtected  String
+  firstCommitment                 String    @db.VarChar(128)
+  firstCommitmentVersion          String    @default("v1") @db.VarChar(32)
+  firstRngVersion                 String    @db.VarChar(64)
+  firstGeneratedAt                DateTime
+  revealedAt                      DateTime?
+  autoRevealed                    Boolean   @default(false)
+  rerollEligible                  Boolean   @default(false)
+  rerollReason                    String?
+  rerollEntitlementKey            String?   @unique @db.VarChar(192)
+  rerollEntitlementSource         String?   @db.VarChar(32)
+  rerollGrantedAt                 DateTime?
+  rerollExpiresAt                 DateTime?
+  rerollDemoOnly                  Boolean   @default(false)
+  secondValue                     Int?
+  secondNonceEncryptedOrProtected String?
+  secondCommitment                String?   @db.VarChar(128)
+  secondCommitmentVersion         String?   @db.VarChar(32)
+  secondRngVersion                String?   @db.VarChar(64)
+  rerollUsedAt                    DateTime?
+  finalValue                      Int
+  finalSignedValue                Int
+  createdAt                       DateTime  @default(now())
+  updatedAt                       DateTime  @updatedAt
+
+  participantMatch ParticipantMatch @relation(fields: [participantMatchId], references: [id], onDelete: Restrict)
+
+  @@index([state, firstGeneratedAt])
+  @@index([rerollEligible, rerollUsedAt])
+}
+
+model ScoreLedger {
+  id                 String          @id @default(uuid()) @db.Uuid
+  participantWeekId  String          @db.Uuid
+  participantMatchId String?         @db.Uuid
+  type               ScoreLedgerType
+  amount             Int
+  idempotencyKey     String          @unique @db.VarChar(192)
+  reason             String?
+  actorUserId        String?         @db.Uuid
+  metadata           Json?
+  createdAt          DateTime        @default(now())
+
+  participantWeek  ParticipantWeek   @relation(fields: [participantWeekId], references: [id], onDelete: Restrict)
+  participantMatch ParticipantMatch? @relation(fields: [participantMatchId], references: [id], onDelete: Restrict)
+  actor            User?             @relation("ScoreLedgerActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([participantWeekId, createdAt])
+  @@index([participantMatchId])
+  @@index([type, createdAt])
+}
+
+model ScoreReconciliation {
+  id                String    @id @default(uuid()) @db.Uuid
+  participantWeekId String    @db.Uuid
+  ledgerSum         Int
+  cachedValue       Int
+  difference        Int
+  checkedAt         DateTime
+  repairedAt        DateTime?
+  actorUserId       String?   @db.Uuid
+  details           Json
+
+  participantWeek ParticipantWeek @relation(fields: [participantWeekId], references: [id], onDelete: Restrict)
+  actor           User?           @relation("ScoreReconciliationActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([participantWeekId, checkedAt])
+  @@index([difference, checkedAt])
+}
+
+model MvpBaselineVersion {
+  id                String         @id @default(uuid()) @db.Uuid
+  name              String         @unique @db.VarChar(128)
+  status            BaselineStatus @default(DRAFT)
+  sourceDescription String
+  patchFrom         String         @db.VarChar(32)
+  patchTo           String         @db.VarChar(32)
+  collectedAt       DateTime
+  sampleNotes       String?
+  demoOnly          Boolean        @default(true)
+  checksum          String         @db.VarChar(128)
+  validationReport  Json?
+  uploadedById      String         @db.Uuid
+  publishedAt       DateTime?
+  retiredAt         DateTime?
+  createdAt         DateTime       @default(now())
+
+  uploadedBy  User                @relation("BaselineUploader", fields: [uploadedById], references: [id], onDelete: Restrict)
+  metrics     MvpBaselineMetric[]
+  weeks       Week[]
+  evaluations MvpEvaluation[]
+
+  @@index([status, publishedAt])
+}
+
+model MvpBaselineMetric {
+  id         String     @id @default(uuid()) @db.Uuid
+  versionId  String     @db.Uuid
+  tierBucket TierBucket
+  position   Position
+  metricKey  String     @db.VarChar(100)
+  mean       Decimal    @db.Decimal(18, 6)
+  stdDev     Decimal    @db.Decimal(18, 6)
+  sampleSize Int
+  lowerBound Decimal?   @db.Decimal(18, 6)
+  upperBound Decimal?   @db.Decimal(18, 6)
+
+  version MvpBaselineVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+
+  @@unique([versionId, tierBucket, position, metricKey])
+}
+
+model MvpEvaluation {
+  id                     String              @id @default(uuid()) @db.Uuid
+  evaluationKey          String              @unique @db.VarChar(192)
+  seasonMatchId          String              @db.Uuid
+  matchParticipantRawId  String              @db.Uuid
+  participantMatchId     String?             @db.Uuid
+  baselineVersionId      String?             @db.Uuid
+  status                 MvpEvaluationStatus
+  errorCode              String?             @db.VarChar(64)
+  tierBucket             TierBucket?
+  position               Position?
+  visionObjectiveScore   Decimal?            @db.Decimal(18, 6)
+  growthScore            Decimal?            @db.Decimal(18, 6)
+  damageScore            Decimal?            @db.Decimal(18, 6)
+  kdaParticipationScore  Decimal?            @db.Decimal(18, 6)
+  totalScore             Decimal?            @db.Decimal(18, 6)
+  teamRank               Int?
+  award                  MvpAward            @default(NONE)
+  evaluatorVersion       String              @db.VarChar(64)
+  metrics                Json
+  tieBreak               Json
+  supersedesEvaluationId String?             @db.Uuid
+  createdAt              DateTime            @default(now())
+
+  seasonMatch          SeasonMatch         @relation(fields: [seasonMatchId], references: [id], onDelete: Restrict)
+  matchParticipantRaw  MatchParticipantRaw @relation(fields: [matchParticipantRawId], references: [id], onDelete: Restrict)
+  participantMatch     ParticipantMatch?   @relation(fields: [participantMatchId], references: [id], onDelete: Restrict)
+  baselineVersion      MvpBaselineVersion? @relation(fields: [baselineVersionId], references: [id], onDelete: Restrict)
+  supersedesEvaluation MvpEvaluation?      @relation("MvpEvaluationCorrection", fields: [supersedesEvaluationId], references: [id], onDelete: Restrict)
+  corrections          MvpEvaluation[]     @relation("MvpEvaluationCorrection")
+
+  @@index([seasonMatchId, matchParticipantRawId, evaluatorVersion], map: "MvpEvaluation_seasonMatchId_matchParticipantRawId_evaluatorVers")
+  @@index([participantMatchId, award])
+  @@index([seasonMatchId, status])
+  @@index([baselineVersionId, evaluatorVersion])
+}
+
+model MissionDefinition {
+  id              String            @id @default(uuid()) @db.Uuid
+  code            String            @db.VarChar(16)
+  version         Int               @default(1)
+  title           String            @db.VarChar(160)
+  description     String
+  category        MissionCategory
+  kind            MissionKind
+  difficulty      MissionDifficulty
+  points          Int
+  evaluatorKey    String            @db.VarChar(128)
+  evaluatorConfig Json
+  sourceType      MissionSourceType
+  target          Decimal           @db.Decimal(18, 6)
+  targetText      String?           @db.VarChar(64)
+  active          Boolean           @default(true)
+  minPatch        String?           @db.VarChar(32)
+  maxPatch        String?           @db.VarChar(32)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  assignments      WeeklyMissionAssignment[]
+  candidateHistory MissionCandidateHistory[]
+
+  @@unique([code, version])
+  @@index([active, kind, difficulty])
+  @@index([sourceType, active])
+}
+
+model WeeklyMissionAssignment {
+  id                              String                 @id @default(uuid()) @db.Uuid
+  participantWeekId               String                 @db.Uuid
+  missionDefinitionId             String                 @db.Uuid
+  state                           MissionAssignmentState @default(ACTIVE)
+  generation                      Int                    @default(1)
+  selectionKey                    String                 @unique @db.VarChar(192)
+  selectionSeedHash               String                 @db.VarChar(128)
+  selectionMetadata               Json                   @default("{}")
+  assignedAt                      DateTime
+  activeFrom                      DateTime
+  activeTo                        DateTime?
+  progress                        Decimal                @default(0) @db.Decimal(18, 6)
+  target                          Decimal                @db.Decimal(18, 6)
+  unit                            String?                @db.VarChar(32)
+  progressPayload                 Json?
+  completedAt                     DateTime?
+  completedByParticipantMatchId   String?                @db.Uuid
+  lastEvaluatedParticipantMatchId String?                @db.Uuid
+  seenOrder                       Int
+  deferredOrder                   Int?
+  evaluatorVersion                String                 @db.VarChar(64)
+  createdAt                       DateTime               @default(now())
+  updatedAt                       DateTime               @updatedAt
+
+  participantWeek             ParticipantWeek                  @relation(fields: [participantWeekId], references: [id], onDelete: Restrict)
+  missionDefinition           MissionDefinition                @relation(fields: [missionDefinitionId], references: [id], onDelete: Restrict)
+  completedByParticipantMatch ParticipantMatch?                @relation("AssignmentCompletionMatch", fields: [completedByParticipantMatchId], references: [id], onDelete: Restrict)
+  progressEvents              MissionProgressEvent[]
+  completionLedger            MissionCompletionLedger?
+  matchSnapshots              MissionMatchSnapshotAssignment[]
+
+  @@unique([participantWeekId, missionDefinitionId, generation])
+  @@index([participantWeekId, state])
+  @@index([participantWeekId, activeFrom, activeTo])
+  @@index([missionDefinitionId, state])
+}
+
+model MissionMatchSnapshot {
+  id                 String    @id @default(uuid()) @db.Uuid
+  participantMatchId String    @unique @db.Uuid
+  matchStartAt       DateTime
+  sealedAt           DateTime?
+  createdAt          DateTime  @default(now())
+
+  participantMatch ParticipantMatch                 @relation(fields: [participantMatchId], references: [id], onDelete: Restrict)
+  assignments      MissionMatchSnapshotAssignment[]
+
+  @@index([matchStartAt])
+}
+
+model MissionMatchSnapshotAssignment {
+  snapshotId       String @db.Uuid
+  assignmentId     String @db.Uuid
+  evaluatorVersion String @db.VarChar(64)
+
+  snapshot   MissionMatchSnapshot    @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+  assignment WeeklyMissionAssignment @relation(fields: [assignmentId], references: [id], onDelete: Restrict)
+
+  @@id([snapshotId, assignmentId])
+  @@index([assignmentId])
+}
+
+model MissionProgressEvent {
+  id                 String                   @id @default(uuid()) @db.Uuid
+  assignmentId       String                   @db.Uuid
+  participantMatchId String                   @db.Uuid
+  type               MissionProgressEventType @default(NORMAL)
+  beforeValue        Decimal                  @db.Decimal(18, 6)
+  deltaValue         Decimal                  @db.Decimal(18, 6)
+  afterValue         Decimal                  @db.Decimal(18, 6)
+  completed          Boolean                  @default(false)
+  evaluatorVersion   String                   @db.VarChar(64)
+  facts              Json
+  supersedesEventId  String?                  @db.Uuid
+  correctionReason   String?
+  correctedByUserId  String?                  @db.Uuid
+  idempotencyKey     String                   @unique @db.VarChar(192)
+  createdAt          DateTime                 @default(now())
+
+  assignment       WeeklyMissionAssignment @relation(fields: [assignmentId], references: [id], onDelete: Restrict)
+  participantMatch ParticipantMatch        @relation(fields: [participantMatchId], references: [id], onDelete: Restrict)
+  supersedes       MissionProgressEvent?   @relation("MissionEventCorrection", fields: [supersedesEventId], references: [id], onDelete: Restrict)
+  corrections      MissionProgressEvent[]  @relation("MissionEventCorrection")
+  correctedBy      User?                   @relation("MissionCorrectionActor", fields: [correctedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([assignmentId, participantMatchId, evaluatorVersion])
+  @@index([assignmentId, createdAt])
+  @@index([participantMatchId])
+}
+
+model MissionCompletionLedger {
+  id                String            @id @default(uuid()) @db.Uuid
+  participantWeekId String            @db.Uuid
+  assignmentId      String?           @unique @db.Uuid
+  type              MissionLedgerType
+  points            Int
+  idempotencyKey    String            @unique @db.VarChar(192)
+  actorUserId       String?           @db.Uuid
+  reason            String?
+  metadata          Json?
+  createdAt         DateTime          @default(now())
+
+  participantWeek ParticipantWeek          @relation(fields: [participantWeekId], references: [id], onDelete: Restrict)
+  assignment      WeeklyMissionAssignment? @relation(fields: [assignmentId], references: [id], onDelete: Restrict)
+  actor           User?                    @relation("MissionLedgerActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([participantWeekId, createdAt])
+  @@index([type, createdAt])
+}
+
+model MissionRefillState {
+  id                 String   @id @default(uuid()) @db.Uuid
+  participantWeekId  String   @unique @db.Uuid
+  credits            Int      @default(0)
+  maxCredits         Int      @default(3)
+  intervalMinutes    Int      @default(360)
+  anchorAt           DateTime
+  accountedThroughAt DateTime
+  nextAccrualAt      DateTime
+  updatedAt          DateTime @updatedAt
+
+  participantWeek ParticipantWeek @relation(fields: [participantWeekId], references: [id], onDelete: Cascade)
+
+  @@index([nextAccrualAt])
+}
+
+model MissionRerollState {
+  id                String    @id @default(uuid()) @db.Uuid
+  participantWeekId String    @unique @db.Uuid
+  lastUsedAt        DateTime?
+  nextAvailableAt   DateTime?
+  cooldownMinutes   Int       @default(60)
+  totalUsed         Int       @default(0)
+  updatedAt         DateTime  @updatedAt
+
+  participantWeek ParticipantWeek @relation(fields: [participantWeekId], references: [id], onDelete: Cascade)
+
+  @@index([nextAvailableAt])
+}
+
+model MissionCandidateHistory {
+  id                  String                 @id @default(uuid()) @db.Uuid
+  participantWeekId   String                 @db.Uuid
+  missionDefinitionId String                 @db.Uuid
+  firstSeenAt         DateTime
+  completedAt         DateTime?
+  rerolledAt          DateTime?
+  timesAssigned       Int                    @default(0)
+  status              MissionCandidateStatus @default(UNSEEN)
+
+  participantWeek   ParticipantWeek   @relation(fields: [participantWeekId], references: [id], onDelete: Cascade)
+  missionDefinition MissionDefinition @relation(fields: [missionDefinitionId], references: [id], onDelete: Restrict)
+
+  @@unique([participantWeekId, missionDefinitionId])
+  @@index([participantWeekId, status, firstSeenAt])
+}
+
+model SyncCursor {
+  id                         String    @id @default(uuid()) @db.Uuid
+  participantId              String    @unique @db.Uuid
+  seasonId                   String?   @db.Uuid
+  lastRequestedStartAt       DateTime?
+  lastSuccessfulMatchStartAt DateTime?
+  newestKnownMatchId         String?   @db.VarChar(128)
+  paginationStart            Int       @default(0)
+  paginationWindowStartAt    DateTime?
+  paginationWindowEndAt      DateTime?
+  lastSuccessAt              DateTime?
+  lastErrorAt                DateTime?
+  lastErrorCode              String?   @db.VarChar(64)
+  consecutiveFailures        Int       @default(0)
+  nextEligibleAt             DateTime?
+  updatedAt                  DateTime  @updatedAt
+
+  participant Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  season      Season?     @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+
+  @@index([nextEligibleAt, consecutiveFailures])
+  @@index([seasonId, paginationStart])
+}
+
+model SyncRun {
+  id                String        @id @default(uuid()) @db.Uuid
+  invocationKey     String        @unique @db.VarChar(192)
+  trigger           SyncTrigger
+  status            SyncRunStatus @default(RUNNING)
+  startedAt         DateTime
+  finishedAt        DateTime?
+  participantCount  Int           @default(0)
+  matchIdsFound     Int           @default(0)
+  matchesFetched    Int           @default(0)
+  matchesProcessed  Int           @default(0)
+  matchesSkipped    Int           @default(0)
+  errorCount        Int           @default(0)
+  rateLimitSnapshot Json?
+  requestedById     String?       @db.Uuid
+  metadata          Json?
+
+  requestedBy User?         @relation("SyncRequester", fields: [requestedById], references: [id], onDelete: SetNull)
+  items       SyncRunItem[]
+
+  @@index([status, startedAt])
+  @@index([trigger, startedAt])
+}
+
+model SyncRunItem {
+  id               String            @id @default(uuid()) @db.Uuid
+  syncRunId        String            @db.Uuid
+  participantId    String?           @db.Uuid
+  riotMatchId      String?           @db.VarChar(128)
+  stage            String            @db.VarChar(64)
+  status           SyncRunItemStatus
+  errorCode        String?           @db.VarChar(64)
+  messageSanitized String?
+  retryable        Boolean           @default(false)
+  durationMs       Int?
+  createdAt        DateTime          @default(now())
+
+  syncRun     SyncRun      @relation(fields: [syncRunId], references: [id], onDelete: Cascade)
+  participant Participant? @relation(fields: [participantId], references: [id], onDelete: SetNull)
+
+  @@index([syncRunId, status])
+  @@index([participantId, createdAt])
+  @@index([riotMatchId])
+}
+
+model JobLease {
+  key         String   @id @db.VarChar(128)
+  ownerToken  String   @db.VarChar(128)
+  acquiredAt  DateTime
+  expiresAt   DateTime
+  heartbeatAt DateTime
+
+  @@index([expiresAt])
+}
+
+model ProcessingOutbox {
+  id          String       @id @default(uuid()) @db.Uuid
+  type        String       @db.VarChar(100)
+  aggregateId String       @db.VarChar(128)
+  payload     Json
+  status      OutboxStatus @default(PENDING)
+  attempts    Int          @default(0)
+  availableAt DateTime
+  lockedAt    DateTime?
+  processedAt DateTime?
+  lastError   String?
+  dedupeKey   String       @unique @db.VarChar(192)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([status, availableAt])
+}
+
+model Announcement {
+  id          String             @id @default(uuid()) @db.Uuid
+  title       String             @db.VarChar(200)
+  body        String
+  status      AnnouncementStatus @default(DRAFT)
+  pinned      Boolean            @default(false)
+  publishedAt DateTime?
+  expiresAt   DateTime?
+  createdById String             @db.Uuid
+  updatedById String             @db.Uuid
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  createdBy User @relation("AnnouncementCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  updatedBy User @relation("AnnouncementUpdater", fields: [updatedById], references: [id], onDelete: Restrict)
+
+  @@index([status, pinned, publishedAt])
+  @@index([expiresAt])
+}
+
+model LegalDocument {
+  id          String              @id @default(uuid()) @db.Uuid
+  type        LegalDocumentType
+  version     Int
+  title       String              @db.VarChar(200)
+  body        String
+  effectiveAt DateTime
+  publishedAt DateTime?
+  status      LegalDocumentStatus @default(DRAFT)
+  createdById String              @db.Uuid
+  checksum    String              @db.VarChar(128)
+  createdAt   DateTime            @default(now())
+
+  createdBy User           @relation("LegalDocumentCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  consents  LegalConsent[]
+
+  @@unique([type, version])
+  @@index([status, effectiveAt])
+}
+
+model AuditLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  actorUserId String?  @db.Uuid
+  action      String   @db.VarChar(128)
+  targetType  String   @db.VarChar(128)
+  targetId    String?  @db.VarChar(128)
+  reason      String?
+  before      Json?
+  after       Json?
+  requestId   String?  @db.VarChar(128)
+  ipHash      String?  @db.VarChar(128)
+  createdAt   DateTime @default(now())
+
+  actor User? @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([actorUserId, createdAt])
+  @@index([targetType, targetId, createdAt])
+  @@index([action, createdAt])
+  @@index([createdAt])
+}
+
+model FeatureFlag {
+  key         String   @id @db.VarChar(128)
+  enabled     Boolean  @default(false)
+  config      Json
+  description String
+  updatedById String?  @db.Uuid
+  updatedAt   DateTime @updatedAt
+
+  updatedBy User? @relation("FeatureFlagUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+}
+
+model SystemSetting {
+  key         String   @id @db.VarChar(128)
+  value       Json
+  version     Int      @default(1)
+  updatedById String?  @db.Uuid
+  updatedAt   DateTime @updatedAt
+
+  updatedBy User? @relation("SystemSettingUpdater", fields: [updatedById], references: [id], onDelete: SetNull)
+}
+
+model ExportJob {
+  id            String          @id @default(uuid()) @db.Uuid
+  type          ExportJobType
+  status        ExportJobStatus @default(PENDING)
+  weekId        String?         @db.Uuid
+  requestedById String          @db.Uuid
+  objectPath    String?
+  checksum      String?         @db.VarChar(128)
+  expiresAt     DateTime?
+  createdAt     DateTime        @default(now())
+  finishedAt    DateTime?
+  errorCode     String?         @db.VarChar(64)
+
+  week        Week? @relation(fields: [weekId], references: [id], onDelete: Restrict)
+  requestedBy User  @relation("ExportRequester", fields: [requestedById], references: [id], onDelete: Restrict)
+
+  @@index([status, createdAt])
+  @@index([weekId, type])
+}

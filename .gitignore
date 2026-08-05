@@ -1,0 +1,31 @@
+# dependencies
+/node_modules
+
+# Next.js output
+/.next
+/out
+
+# test output
+/coverage
+/playwright-report
+/test-results
+
+# generated Prisma client
+/src/generated/prisma
+
+# local environment files
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# tooling and operating system files
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
+*.log
+
+# IDE settings
+.idea
+.vscode/*
+!.vscode/extensions.json

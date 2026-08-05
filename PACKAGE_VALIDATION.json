@@ -1,0 +1,28 @@
+{
+  "status": "SUPERSEDED_BY_SESSION_00",
+  "checkedAt": "2026-08-04",
+  "supersededAt": "2026-08-04",
+  "errors": [],
+  "notes": [
+    "19 staged prompts (00-18) present",
+    "3 helper/one-shot prompts present",
+    "100 unique sequential mission definitions M001-M100",
+    "canonical env/route names checked",
+    "2026-08-03 Riot community competition guideline separation recorded",
+    "no populated API/auth/cron secrets found",
+    "AGENTS.md size 8921 bytes (<32 KiB)",
+    "combined guide and prompt collection contain every canonical source",
+    "core scoring, mission, auth, sync, and audit invariants present",
+    "This result describes the pre-audit package snapshot; canonical files changed during session 00",
+    "MASTER_GUIDE.md and ALL_CODEX_PROMPTS.md are reference-only until regenerated"
+  ],
+  "sourceFileCount": 34,
+  "sourceTotalBytes": 235975,
+  "packageFileCountBeforeZip": 38,
+  "generatedArtifacts": [
+    "ALL_CODEX_PROMPTS.md",
+    "MASTER_GUIDE.md",
+    "PACKAGE_VALIDATION.json",
+    "PACKAGE_MANIFEST.md"
+  ]
+}
