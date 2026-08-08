@@ -19,25 +19,9 @@ export function AuthFrame({
       <section className="auth-context">
         <p className="section-label">DELUXE SOLO QUEUE</p>
         <h1>
-          경기 기록은 자동으로.
-          <br />
-          경쟁은 선명하게.
+          디럭스 솔랭대결
         </h1>
-        <p>
-          Riot API 기반 솔로 랭크 대회 기록과 점수·미션을 하나의 운영 흐름에서
-          확인합니다.
-        </p>
-        <ol>
-          <li>
-            <span>01</span>Riot ID는 승인 후 PUUID로 추적
-          </li>
-          <li>
-            <span>02</span>점수 변화는 append-only 원장에 기록
-          </li>
-          <li>
-            <span>03</span>미션은 경기 시작 시점 기준으로 판정
-          </li>
-        </ol>
+      
       </section>
       <section className="auth-panel">
         <p className="section-label">{eyebrow}</p>
