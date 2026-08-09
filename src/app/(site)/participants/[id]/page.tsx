@@ -39,12 +39,7 @@ export default async function ParticipantPage({
   if (result.state === "unavailable") {
     return (
       <div className="page-stack">
-        <SectionHeading
-          eyebrow="PARTICIPANT"
-          title="참가자 기록"
-          description="공개 가능한 참가자 통계를 불러옵니다."
-          level={1}
-        />
+        <SectionHeading eyebrow="PARTICIPANT" title="참가자 기록" level={1} />
         <DataState
           state="error"
           title="참가자 기록을 불러오지 못했습니다."
@@ -141,11 +136,7 @@ export default async function ParticipantPage({
         ]}
       />
       <section className="profile-chart-panel" aria-labelledby="progress-title">
-        <SectionHeading
-          eyebrow="TOURNAMENT TRAJECTORY"
-          title="대회 추이"
-          description="일별 snapshot의 대회 점수와 공식 LP를 함께 표시합니다."
-        />
+        <SectionHeading eyebrow="TOURNAMENT TRAJECTORY" title="대회 추이" />
         <div id="progress-title">
           <ProgressChart data={profile.scoreSeries} />
         </div>
@@ -202,13 +193,11 @@ export default async function ParticipantPage({
             <Award aria-hidden="true" />
             <span>MVP</span>
             <strong>{profile.awards.mvp}회</strong>
-            <small>대회 내부 평가</small>
           </article>
           <article>
             <Eye aria-hidden="true" />
             <span>ACE</span>
             <strong>{profile.awards.ace}회</strong>
-            <small>대회 내부 평가</small>
           </article>
           <article>
             <Crosshair aria-hidden="true" />
@@ -220,7 +209,6 @@ export default async function ParticipantPage({
             <Swords aria-hidden="true" />
             <span>점수 원장</span>
             <strong>{profile.ledger.length}건</strong>
-            <small>append-only</small>
           </article>
         </div>
       </section>
@@ -265,11 +253,7 @@ export default async function ParticipantPage({
           )}
         </section>
         <section>
-          <SectionHeading
-            eyebrow="SCORE LEDGER"
-            title="점수 원장"
-            description="현재 점수는 아래 append-only 원장 합계입니다."
-          />
+          <SectionHeading eyebrow="SCORE LEDGER" title="점수 원장" />
           {profile.ledger.length ? (
             <div className="simple-table-wrap" tabIndex={0}>
               <table className="data-table simple-table">

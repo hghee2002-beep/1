@@ -27,7 +27,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     <AuthFrame
       eyebrow="ACCOUNT ACCESS"
       title="로그인"
-      description="대회 참가 신청과 내 기록을 확인합니다."
       alternate={{ text: "계정이 없나요?", label: "회원가입", href: "/signup" }}
     >
       <LoginForm

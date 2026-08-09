@@ -85,12 +85,7 @@ export default async function MatchesPage({
   if (result.state !== "ready") {
     return (
       <div className="page-stack">
-        <SectionHeading
-          eyebrow="MATCH ARCHIVE"
-          title="경기 기록"
-          description="대회 처리 경기와 관리자 무효 표시를 함께 제공합니다."
-          level={1}
-        />
+        <SectionHeading eyebrow="MATCH ARCHIVE" title="경기 기록" level={1} />
         <DataState
           state={result.state === "empty" ? "empty" : "error"}
           title={
@@ -125,7 +120,6 @@ export default async function MatchesPage({
       <SectionHeading
         eyebrow={`MATCH ARCHIVE · ${data.week.name}`}
         title="경기 기록"
-        description="대회 처리 경기 · 관리자 무효 상태 표시 · Asia/Seoul 종료 시각 · 최신 경기 순"
         level={1}
       />
       <form
@@ -234,10 +228,6 @@ export default async function MatchesPage({
           )}
         </nav>
       ) : null}
-      <p className="table-footnote">
-        공개 화면에는 정규화한 경기 통계만 표시하며 Riot 원본 summary·timeline
-        JSON은 제공하지 않습니다.
-      </p>
     </div>
   );
 }

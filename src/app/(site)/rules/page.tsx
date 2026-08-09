@@ -24,12 +24,7 @@ export default async function RulesPage() {
   if (result.state !== "ready") {
     return (
       <article className="page-stack rules-page">
-        <SectionHeading
-          eyebrow="PUBLISHED RULES"
-          title="대회 규칙"
-          description="게시된 규칙 버전을 불러옵니다."
-          level={1}
-        />
+        <SectionHeading eyebrow="PUBLISHED RULES" title="대회 규칙" level={1} />
         <DataState
           state={result.state === "empty" ? "empty" : "error"}
           title={
@@ -57,7 +52,6 @@ export default async function RulesPage() {
       <SectionHeading
         eyebrow={`RULESET ${season.rulesVersion} · ${effectiveScoringMode}`}
         title="대회 규칙"
-        description="모든 참가자에게 같은 규칙을 적용하며 운영 중 변경은 버전과 감사 기록을 남깁니다."
         level={1}
       />
       <nav className="rule-index" aria-label="규칙 목차">

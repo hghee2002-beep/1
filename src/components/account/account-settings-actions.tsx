@@ -219,17 +219,11 @@ export function AccountSettingsActions({
         </button>
         <LogoutForm>
           <LogOut aria-hidden="true" />
-          <span>
-            <strong>로그아웃</strong>
-            <small>현재 세션을 즉시 폐기합니다.</small>
-          </span>
+          <strong>로그아웃</strong>
         </LogoutForm>
         <Link href="/rules#privacy">
           <BadgeCheck aria-hidden="true" />
-          <span>
-            <strong>개인정보 설정</strong>
-            <small>동의 정책과 공개 범위를 확인합니다.</small>
-          </span>
+          <strong>개인정보 설정</strong>
         </Link>
       </div>
       {identityStatus ? (

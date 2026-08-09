@@ -21,7 +21,6 @@ export default async function HistoryPage() {
       <SectionHeading
         eyebrow="IMMUTABLE ARCHIVE"
         title="지난 주차 · 종료 시즌"
-        description="종료 당시 저장한 WeekSnapshot과 FinalStandingSnapshot만 표시하며 현재 데이터로 다시 계산하지 않습니다."
         level={1}
       />
       {result.state === "unavailable" ? (

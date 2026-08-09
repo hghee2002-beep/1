@@ -30,7 +30,6 @@ export default async function HomePage() {
         <SectionHeading
           eyebrow="DELUXE SOLO QUEUE"
           title="대회 대시보드"
-          description="종료 카운트다운과 현재 TOP 5를 불러오는 중입니다."
           level={1}
           action={
             <Link className="text-link" href="/leaderboard">
@@ -139,7 +138,6 @@ export default async function HomePage() {
         <SectionHeading
           eyebrow="LIVE STANDINGS"
           title="현재 TOP 5"
-          description="점수 → 승패 차 → 승리 수 순으로 정렬 · 공동 순위 적용"
           action={
             <Link className="text-link" href="/leaderboard">
               전체 순위표 <ArrowRight aria-hidden="true" />

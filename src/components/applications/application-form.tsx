@@ -197,7 +197,6 @@ export function ApplicationForm({
         <span>01</span>
         <div>
           <strong>Riot ID 입력</strong>
-          <small>표시 이름이 바뀌어도 PUUID로 같은 계정을 추적합니다.</small>
         </div>
       </div>
       <FormErrorSummary message={message} fields={fields} />
@@ -240,12 +239,6 @@ export function ApplicationForm({
           <FieldErrors name="tagLine" fields={fields} />
         </label>
       </div>
-      <p className="field-help">
-        예: <code>Cloud Tempo#0217</code>
-        {process.env.NODE_ENV !== "production"
-          ? " · Mock 오류 fixture: NotFound, TemporaryFailure, RateLimited"
-          : null}
-      </p>
       <button
         className="button-secondary button-full"
         type="button"
@@ -262,10 +255,6 @@ export function ApplicationForm({
             </span>
             <div>
               <RiotId gameName={verified.gameName} tagLine={verified.tagLine} />
-              <small>
-                계정 확인됨 ·{" "}
-                {verified.source === "MOCK" ? "Mock fixture" : "Riot API"}
-              </small>
             </div>
             <StatusBadge label="검증 완료" tone="ready" />
           </header>
@@ -291,9 +280,7 @@ export function ApplicationForm({
       ) : null}
       <div className="application-options">
         <label htmlFor="primaryPosition">
-          <span>
-            주 포지션 <small>선택</small>
-          </span>
+          <span>주 포지션</span>
           <select
             id="primaryPosition"
             name="primaryPosition"
@@ -308,9 +295,7 @@ export function ApplicationForm({
           <FieldErrors name="primaryPosition" fields={fields} />
         </label>
         <label htmlFor="secondaryPosition">
-          <span>
-            부 포지션 <small>선택</small>
-          </span>
+          <span>부 포지션</span>
           <select
             id="secondaryPosition"
             name="secondaryPosition"
@@ -331,7 +316,7 @@ export function ApplicationForm({
           type="checkbox"
           defaultChecked={defaults.realNamePublic}
         />
-        공개 순위와 프로필에 실명을 표시합니다. <small>선택</small>
+        공개 순위와 프로필에 실명을 표시합니다.
       </label>
       <button
         className="button-primary button-full"

@@ -57,7 +57,6 @@ export default async function MissionsPage() {
       <SectionHeading
         eyebrow={`WEEKLY OBJECTIVES · ${dashboard?.week.name ?? leaderboard?.week.name ?? "주차 없음"}`}
         title="주간 미션"
-        description="경기 시작 시점에 활성인 미션만 평가하며 모든 진행도를 정확한 수치로 표시합니다."
         level={1}
       />
       <StatStrip
@@ -138,11 +137,7 @@ export default async function MissionsPage() {
         </div>
       </section>
       <section aria-labelledby="mission-rank-title">
-        <SectionHeading
-          eyebrow="MISSION STANDINGS"
-          title="주간 미션 순위"
-          description="미션 완료 원장 점수 합계 · 공동 순위는 1, 1, 3 방식"
-        />
+        <SectionHeading eyebrow="MISSION STANDINGS" title="주간 미션 순위" />
         <div className="simple-table-wrap" tabIndex={0}>
           <table className="data-table simple-table">
             <caption className="sr-only">주간 미션 순위</caption>

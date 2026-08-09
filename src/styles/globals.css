@@ -1162,11 +1162,6 @@ svg {
 .expanded-row {
   display: none;
 }
-.table-footnote {
-  margin: -1.2rem 0 0;
-  color: var(--text-muted);
-  font-size: 0.68rem;
-}
 .simple-table {
   min-width: 820px;
 }
@@ -1214,17 +1209,6 @@ svg {
   outline: 0;
   background: transparent;
   font-size: 0.78rem;
-}
-.toolbar-note {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin-left: auto;
-  color: var(--text-muted);
-  font-size: 0.66rem;
-}
-.toolbar-note svg {
-  width: 14px;
 }
 .toolbar-result {
   margin-left: auto;
@@ -2451,14 +2435,6 @@ svg {
   padding-bottom: 0.9rem;
   color: var(--text-muted);
   font-style: normal;
-}
-.field-help {
-  margin: 0.6rem 0 1rem;
-  color: var(--text-muted);
-  font-size: 0.62rem;
-}
-.field-help code {
-  color: var(--text-soft);
 }
 .identity-preview {
   margin: 1rem 0;

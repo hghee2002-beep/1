@@ -26,7 +26,6 @@ export default async function ApplyPage() {
       <SectionHeading
         eyebrow="PARTICIPATION"
         title="Riot ID 참가 신청"
-        description="게임 이름과 태그라인을 분리 입력하면 서버에서 계정과 솔로 랭크를 검증합니다."
         level={1}
       />
       {latest?.status === "REJECTED" ? (
@@ -88,7 +87,6 @@ export default async function ApplyPage() {
               </span>
               <div>
                 <strong>사이트 계정 인증</strong>
-                <small>로그인 완료</small>
               </div>
             </li>
             <li className={pending ? "is-done" : "is-current"}>
@@ -101,21 +99,18 @@ export default async function ApplyPage() {
               </span>
               <div>
                 <strong>Riot ID 검증</strong>
-                <small>PUUID와 솔로 랭크 확인</small>
               </div>
             </li>
             <li className={pending ? "is-current" : undefined}>
               <span>03</span>
               <div>
                 <strong>관리자 검토</strong>
-                <small>PUUID 중복과 현재 랭크 확인</small>
               </div>
             </li>
             <li>
               <span>04</span>
               <div>
                 <strong>참가 승인</strong>
-                <small>시즌 참가자와 주차 상태 생성</small>
               </div>
             </li>
           </ol>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CircleHelp, Download, Search } from "lucide-react";
+import { Download, Search } from "lucide-react";
 
 import { LeaderboardTable } from "@/components/leaderboard/leaderboard-table";
 import { StatusBadge } from "@/components/system/status-badge";
@@ -31,12 +31,7 @@ export default async function LeaderboardPage({ searchParams }: Props) {
   if (result.state !== "ready") {
     return (
       <div className="page-stack">
-        <SectionHeading
-          eyebrow="LIVE STANDINGS"
-          title="전체 순위"
-          description="점수 원장 기반 순위를 불러옵니다."
-          level={1}
-        />
+        <SectionHeading eyebrow="LIVE STANDINGS" title="전체 순위" level={1} />
         <DataState
           state={result.state === "empty" ? "empty" : "error"}
           title={
@@ -149,10 +144,6 @@ export default async function LeaderboardPage({ searchParams }: Props) {
           </select>
         </label>
         <button type="submit">조회</button>
-        <span className="toolbar-note">
-          <CircleHelp aria-hidden="true" />
-          점수 → 승패 차 → 승리 수 · 완전 동률은 공동 순위
-        </span>
       </form>
       {rows.length ? (
         <LeaderboardTable rows={rows} />
@@ -163,10 +154,6 @@ export default async function LeaderboardPage({ searchParams }: Props) {
           description="Riot ID의 gameName 또는 tagLine을 확인해 주세요."
         />
       )}
-      <p className="table-footnote">
-        Riot ID 태그라인은 항상 표시됩니다. 모바일에서는 행의 펼치기 버튼으로
-        부가 기록을 확인할 수 있습니다.
-      </p>
     </div>
   );
 }

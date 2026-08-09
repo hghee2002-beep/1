@@ -312,10 +312,7 @@ export function MatchTable({
                   <Streak value={match.streak} />
                 ) : null}
                 {match.award ? (
-                  <span className="award-badge">
-                    {match.award}
-                    <small>대회 내부 평가</small>
-                  </span>
+                  <span className="award-badge">{match.award}</span>
                 ) : null}
               </div>
               <div className="match-point">
