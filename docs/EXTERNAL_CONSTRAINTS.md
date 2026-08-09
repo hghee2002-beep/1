@@ -62,6 +62,8 @@
 ### 1.7 정적 데이터
 
 - 챔피언·아이템 이미지와 분류는 사용 가능한 공식 정적 데이터 자산을 우선한다.
+- 프로필·챔피언·아이템·스펠·룬 URL은 `src/lib/riot-assets.ts`에서만 생성하고 Data Dragon host와 안전한 경로만 허용한다.
+- 랭크 엠블럼은 Riot Developer Portal의 `ranked-emblems-latest.zip` 원본을 `public/riot/ranked-emblems`에 보존하며 출처와 갱신일을 함께 기록한다.
 - gameVersion과 정적 데이터 버전이 다를 수 있으므로 nearest-compatible resolver와 fallback을 둔다.
 - 원격 이미지 실패 시 텍스트·placeholder로 화면이 깨지지 않아야 한다.
 - 2026-08-05 공식 LoL 문서는 Data Dragon 갱신이 client patch와 늦을 수 있음을 명시하므로, exact major/minor 최신 build → 같은 major의 가까운 minor → last-known-good cache → 제한된 bundled metadata 순으로 해석한다.

@@ -330,3 +330,10 @@
 - 결정: 참가 신청에서 실명 공개 선택값을 받지 않고 공개 순위·미션 순위·참가자 프로필은 `User.realName`을 항상 표시한다. gameName의 앞뒤 공백만 제거하고 내부 공백은 보존해 URL encoding한다. 참가자의 권위 식별자는 PUUID이며 Summoner-V4의 `id`는 선택 정보로 취급한다. 이 결정은 D-020과 D-027의 실명 공개 동의 부분을 대체한다.
 - 대안과 기각 이유: 클라이언트에서 공개값을 강제로 보내는 방식은 우회 가능한 선택값을 남긴다. 누락된 summoner ID를 PUUID로 채워 넣으면 서로 다른 식별자 의미가 섞인다.
 - 데이터/마이그레이션 영향: 기존 `realNamePublic`과 `realNamePublicConsentAt`은 호환을 위해 유지하지만 공개 여부 판단에는 사용하지 않는다. `Participant.summonerId`를 nullable로 완화하는 forward migration을 추가한다.
+
+## D-036. Riot 공식 에셋의 공용 경계
+
+- 배경: 참가 신청 검증 결과에 프로필 아이콘과 티어 엠블럼을 표시하고, 이후 인게임·전적 화면에서도 챔피언·아이템·룬 등 같은 공식 자산을 일관되게 재사용해야 한다.
+- 결정: 패치별 프로필·챔피언·아이템·스펠·룬 이미지는 Riot Data Dragon 경로만 생성하는 client-safe `riot-assets` 모듈을 사용한다. Riot이 개별 CDN 경로 없이 공식 ZIP으로 배포하는 최신 랭크 엠블럼은 원본을 `public/riot/ranked-emblems`에 보존하고 같은 모듈에서 티어별 경로를 제공한다. 원격 이미지 실패 또는 미배치 계정에는 텍스트 fallback을 유지하며 내부 식별자인 PUUID는 참가자 검증 결과 UI에 표시하지 않는다.
+- 대안과 기각 이유: 화면마다 URL을 직접 조합하면 patch·경로 검증·fallback이 분산된다. 런타임에 ZIP을 내려받아 해제하면 외부 장애가 사용자 화면을 깨뜨리고 서버리스 쓰기 경계와 맞지 않는다. 비공식 자산 CDN은 출처와 버전 관리가 불명확하다.
+- 데이터/마이그레이션 영향: schema migration은 없다. Data Dragon 기본 버전과 vendored 엠블럼은 공식 versions endpoint와 ranked-emblems-latest 배포를 확인한 change에서 갱신한다.

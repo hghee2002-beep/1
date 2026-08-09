@@ -2453,6 +2453,26 @@ svg {
   flex-direction: column;
   gap: 0.2rem;
 }
+.riot-profile-icon {
+  position: relative;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--amber);
+  font: 900 0.9rem/1 var(--font-mono-system);
+}
+.riot-profile-icon img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 .identity-preview header small {
   color: var(--text-muted);
   font-size: 0.57rem;
@@ -2460,9 +2480,42 @@ svg {
 .identity-preview .status-badge {
   margin-left: auto;
 }
+.identity-preview-body {
+  display: grid;
+  grid-template-columns: 168px minmax(0, 1fr);
+  align-items: center;
+  min-height: 168px;
+}
+.riot-rank-emblem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  margin: 0;
+  border-right: 1px solid var(--line);
+  padding: 0.55rem 0.75rem 0.7rem;
+}
+.riot-rank-emblem-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font: 800 1rem/1 var(--font-mono-system);
+}
+.riot-rank-emblem-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.riot-rank-emblem figcaption {
+  color: var(--text-soft);
+  font: 800 0.68rem/1 var(--font-mono-system);
+  letter-spacing: 0.08em;
+}
 .identity-preview dl {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   margin: 0;
 }
 .identity-preview dl > div {
@@ -4590,6 +4643,24 @@ svg {
   }
   .identity-preview dl {
     grid-template-columns: 1fr;
+  }
+  .identity-preview-body {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+  .riot-rank-emblem {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .riot-rank-emblem-art {
+    width: 112px !important;
+    height: 112px !important;
+  }
+  .application-form > .button-full {
+    position: relative;
+    z-index: 1;
+    scroll-margin-top: calc(var(--header-height) + 1rem);
+    scroll-margin-bottom: 82px;
   }
   .identity-preview dl > div {
     border-right: 0;

@@ -9,7 +9,7 @@ export function buildSecurityHeaders(production: boolean) {
     "form-action 'self'",
     `script-src 'self' 'unsafe-inline'${production ? "" : " 'unsafe-eval'"}`,
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob:",
+    "img-src 'self' data: blob: https://ddragon.leagueoflegends.com",
     "font-src 'self' data:",
     `connect-src 'self'${production ? "" : " ws: wss:"}`,
     "worker-src 'self' blob:",
@@ -48,6 +48,17 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   devIndicators: false,
   serverExternalPackages: ["argon2"],
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "ddragon.leagueoflegends.com",
+        port: "",
+        pathname: "/cdn/**",
+        search: "",
+      },
+    ],
+  },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },

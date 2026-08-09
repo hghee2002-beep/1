@@ -149,6 +149,13 @@ test("member application, admin approval, and participant transition work end to
   await page.getByLabel("태그라인").fill("TEST");
   await page.getByRole("button", { name: "Riot 계정 검증" }).click();
   await expect(page.getByText("검증 완료")).toBeVisible();
+  await expect(
+    page.getByRole("img", { name: `${gameName} 프로필 아이콘` }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("img", { name: "EMERALD 티어 엠블럼" }),
+  ).toBeVisible();
+  await expect(page.getByText("PUUID", { exact: true })).toHaveCount(0);
   await page.getByLabel(/주 포지션/u).selectOption("MIDDLE");
   await page.getByLabel(/부 포지션/u).selectOption("JUNGLE");
   await page.getByRole("button", { name: "참가 신청 제출" }).click();

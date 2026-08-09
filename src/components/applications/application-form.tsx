@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
 import { FormErrorSummary } from "@/components/auth/form-error-summary";
+import {
+  RiotProfileIcon,
+  RiotRankEmblem,
+} from "@/components/riot/riot-asset-image";
 import { RiotId } from "@/components/ui/riot-id";
 import { StatusBadge } from "@/components/system/status-badge";
 import {
@@ -248,32 +252,32 @@ export function ApplicationForm({
       {verified ? (
         <div className="identity-preview" aria-live="polite">
           <header>
-            <span className="profile-disc" aria-hidden="true">
-              {verified.gameName.slice(0, 1)}
-            </span>
+            <RiotProfileIcon
+              profileIconId={verified.profileIconId}
+              gameName={verified.gameName}
+            />
             <div>
               <RiotId gameName={verified.gameName} tagLine={verified.tagLine} />
             </div>
             <StatusBadge label="검증 완료" tone="ready" />
           </header>
-          <dl>
-            <div>
-              <dt>솔로 랭크</dt>
-              <dd>
-                {verified.soloQueue
-                  ? `${verified.soloQueue.tier} ${verified.soloQueue.rank} · ${verified.soloQueue.leaguePoints} LP`
-                  : "UNRANKED"}
-              </dd>
-            </div>
-            <div>
-              <dt>레벨</dt>
-              <dd>{verified.summonerLevel ?? "-"}</dd>
-            </div>
-            <div>
-              <dt>PUUID</dt>
-              <dd>서버 전용 · 마스킹</dd>
-            </div>
-          </dl>
+          <div className="identity-preview-body">
+            <RiotRankEmblem tier={verified.soloQueue?.tier} />
+            <dl>
+              <div>
+                <dt>솔로 랭크</dt>
+                <dd>
+                  {verified.soloQueue
+                    ? `${verified.soloQueue.tier} ${verified.soloQueue.rank} · ${verified.soloQueue.leaguePoints} LP`
+                    : "배치 전"}
+                </dd>
+              </div>
+              <div>
+                <dt>소환사 레벨</dt>
+                <dd>{verified.summonerLevel ?? "-"}</dd>
+              </div>
+            </dl>
+          </div>
         </div>
       ) : null}
       <div className="application-options">
