@@ -10,11 +10,10 @@ import {
   type AuthFieldErrors,
 } from "@/features/auth/types";
 
-function describedBy(fields: AuthFieldErrors, name: string, helpId?: string) {
-  const ids = [
-    helpId,
-    fields[name]?.length ? `${name}-error` : undefined,
-  ].filter((value): value is string => Boolean(value));
+function describedBy(fields: AuthFieldErrors, name: string) {
+  const ids = [fields[name]?.length ? `${name}-error` : undefined].filter(
+    (value): value is string => Boolean(value),
+  );
   return ids.length ? ids.join(" ") : undefined;
 }
 
@@ -96,11 +95,10 @@ export function SignupForm() {
             autoComplete="username"
             placeholder="영문 소문자·숫자 4–32자"
             aria-invalid={fields.loginId?.length ? true : undefined}
-            aria-describedby={describedBy(fields, "loginId", "loginId-help")}
+            aria-describedby={describedBy(fields, "loginId")}
             required
           />
         </span>
-        <small id="loginId-help">점·밑줄·하이픈을 사용할 수 있습니다.</small>
         <FieldErrors name="loginId" fields={fields} />
       </label>
       <label className="field-wide" htmlFor="displayName">
@@ -113,17 +111,10 @@ export function SignupForm() {
             autoComplete="name"
             placeholder="대회 운영에서 사용할 이름"
             aria-invalid={fields.displayName?.length ? true : undefined}
-            aria-describedby={describedBy(
-              fields,
-              "displayName",
-              "displayName-help",
-            )}
+            aria-describedby={describedBy(fields, "displayName")}
             required
           />
         </span>
-        <small id="displayName-help">
-          공개 여부는 참가 신청에서 별도 선택합니다.
-        </small>
         <FieldErrors name="displayName" fields={fields} />
       </label>
       <label htmlFor="password">

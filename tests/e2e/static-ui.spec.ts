@@ -57,6 +57,15 @@ test("signup omits legal consent controls while rules keep published documents",
   await expect(page.getByText("필수 동의", { exact: true })).toHaveCount(0);
   await expect(page.getByLabel(/게시 중인 이용약관/u)).toHaveCount(0);
   await expect(page.getByLabel(/게시 중인 개인정보/u)).toHaveCount(0);
+  await expect(
+    page.getByText("사이트 계정과 Riot 계정 연결은 별도 단계입니다."),
+  ).toHaveCount(0);
+  await expect(
+    page.getByText("점·밑줄·하이픈을 사용할 수 있습니다."),
+  ).toHaveCount(0);
+  await expect(
+    page.getByText("공개 여부는 참가 신청에서 별도 선택합니다."),
+  ).toHaveCount(0);
 
   await page.goto("/rules");
   const terms = page.locator("#terms");

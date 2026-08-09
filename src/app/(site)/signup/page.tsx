@@ -15,7 +15,6 @@ export default async function SignupPage() {
     <AuthFrame
       eyebrow="CREATE ACCOUNT"
       title="회원가입"
-      description="사이트 계정과 Riot 계정 연결은 별도 단계입니다."
       alternate={{
         text: "이미 계정이 있나요?",
         label: "로그인",
