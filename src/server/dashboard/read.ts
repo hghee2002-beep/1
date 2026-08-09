@@ -202,7 +202,7 @@ export async function queryLeaderboard(
             gameName: true,
             tagLine: true,
             user: {
-              select: { realName: true, realNamePublic: true },
+              select: { realName: true },
             },
           },
         },
@@ -352,9 +352,7 @@ export async function queryLeaderboard(
           previousRank,
           gameName: row.participant.gameName,
           tagLine: row.participant.tagLine,
-          realName: row.participant.user.realNamePublic
-            ? row.participant.user.realName
-            : null,
+          realName: row.participant.user.realName,
           score: rankedRow.score,
           wins: row.wins,
           losses: row.losses,

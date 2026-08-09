@@ -25,7 +25,7 @@ const accountSchema = z
 
 const summonerSchema = z
   .object({
-    id: z.string().min(1),
+    id: z.string().min(1).optional(),
     puuid: z.string().min(1),
     profileIconId: nonNegativeInt.optional(),
     summonerLevel: nonNegativeInt.optional(),
@@ -264,7 +264,7 @@ export function normalizeAccount(
 export function normalizeSummoner(input: unknown): RiotSummoner {
   const summoner = parseResponse(summonerSchema, input, "summoner.by-puuid");
   return {
-    id: summoner.id,
+    id: summoner.id ?? null,
     puuid: summoner.puuid,
     profileIconId: summoner.profileIconId ?? null,
     summonerLevel: summoner.summonerLevel ?? null,

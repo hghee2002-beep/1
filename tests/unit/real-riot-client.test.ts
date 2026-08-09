@@ -94,6 +94,42 @@ describe("Real Riot client routing contract", () => {
     ).toBe(true);
   });
 
+  it("accepts a Summoner-V4 response without the legacy summoner ID", async () => {
+    const fetchMock = vi.fn<typeof fetch>(async (input) => {
+      const url = new URL(String(input));
+      if (url.pathname.includes("/accounts/by-riot-id/")) {
+        return json({
+          puuid: "PUUID_SPACE_NAME",
+          gameName: "Name With Spaces",
+          tagLine: "KR1",
+        });
+      }
+      if (url.pathname.includes("/summoners/by-puuid/")) {
+        return json({
+          puuid: "PUUID_SPACE_NAME",
+          profileIconId: 29,
+          summonerLevel: 411,
+        });
+      }
+      if (url.pathname.includes("/league/v4/entries/by-puuid/")) {
+        return json([]);
+      }
+      return json({}, 404);
+    });
+    const client = new RealRiotClient({
+      apiKey: "test-key",
+      http: { fetch: fetchMock, maxRetries: 0, logger: () => undefined },
+    });
+
+    await expect(
+      client.resolveRiotId("Name With Spaces", "KR1"),
+    ).resolves.toMatchObject({
+      gameName: "Name With Spaces",
+      tagLine: "KR1",
+      summonerId: null,
+    });
+  });
+
   it("uses ASIA Match-V5 paths and encodes pagination/time filters", async () => {
     const requests: URL[] = [];
     const fetchMock = vi.fn<typeof fetch>(async (input) => {

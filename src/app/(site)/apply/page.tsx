@@ -73,7 +73,6 @@ export default async function ApplyPage() {
               tagLine: latest?.tagLine,
               primaryPosition: latest?.primaryPosition,
               secondaryPosition: latest?.secondaryPosition,
-              realNamePublic: data.realNamePublic,
             }}
           />
         )}
@@ -114,13 +113,6 @@ export default async function ApplyPage() {
               </div>
             </li>
           </ol>
-          <div className="application-warning">
-            <AlertCircle aria-hidden="true" />
-            <p>
-              일시 장애와 존재하지 않는 계정을 구분합니다. 입력 내용은 오류
-              뒤에도 화면에 유지됩니다.
-            </p>
-          </div>
           <Link className="text-link" href="/me">
             내 신청 상태 보기 <ArrowRight aria-hidden="true" />
           </Link>

@@ -975,7 +975,7 @@ databaseDescribe("weekly mission assignment lifecycle", () => {
     });
   });
 
-  it("uses authoritative ledger scores, competition ties, and name consent", async () => {
+  it("uses authoritative ledger scores, competition ties, and always shows names", async () => {
     const fixture = await setupParticipantWeek();
     const suffix = randomUUID().slice(0, 8);
     await client.user.update({
@@ -1040,7 +1040,7 @@ databaseDescribe("weekly mission assignment lifecycle", () => {
       leaderboard?.standings.find(
         (row) => row.participantId === secondParticipant.id,
       )?.realName,
-    ).toBeNull();
+    ).toBe(secondUser.realName);
   });
 
   it("reads completed-week history only from the immutable snapshot", async () => {

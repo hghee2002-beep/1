@@ -36,6 +36,18 @@ describe("Riot response normalization", () => {
       summonerLevel: 411,
     });
     expect(
+      normalizeSummoner({
+        puuid: "PUUID_WITHOUT_LEGACY_SUMMONER_ID",
+        profileIconId: 29,
+        summonerLevel: 411,
+      }),
+    ).toEqual({
+      id: null,
+      puuid: "PUUID_WITHOUT_LEGACY_SUMMONER_ID",
+      profileIconId: 29,
+      summonerLevel: 411,
+    });
+    expect(
       normalizeSoloQueueEntries([
         {
           queueType: "RANKED_FLEX_SR",

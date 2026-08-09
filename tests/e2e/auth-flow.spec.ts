@@ -151,7 +151,6 @@ test("member application, admin approval, and participant transition work end to
   await expect(page.getByText("검증 완료")).toBeVisible();
   await page.getByLabel(/주 포지션/u).selectOption("MIDDLE");
   await page.getByLabel(/부 포지션/u).selectOption("JUNGLE");
-  await page.getByLabel(/공개 순위와 프로필/u).check();
   await page.getByRole("button", { name: "참가 신청 제출" }).click();
   await expect(page).toHaveURL(/\/me\?application=submitted/u);
   await expect(

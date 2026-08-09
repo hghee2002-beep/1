@@ -16,7 +16,7 @@ export type RankedSoloSnapshot = {
 };
 
 export type RiotSummoner = {
-  id: string;
+  id: string | null;
   puuid: string;
   profileIconId: number | null;
   summonerLevel: number | null;
@@ -24,7 +24,7 @@ export type RiotSummoner = {
 
 export type RiotIdentity = {
   puuid: string;
-  summonerId: string;
+  summonerId: string | null;
   gameName: string;
   tagLine: string;
   profileIconId: number | null;

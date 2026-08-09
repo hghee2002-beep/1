@@ -168,11 +168,7 @@ export function LeaderboardTable({
                       </span>
                       <span>
                         <RiotId gameName={row.gameName} tagLine={row.tagLine} />
-                        {row.realName ? (
-                          <small>{row.realName}</small>
-                        ) : (
-                          <small>실명 비공개</small>
-                        )}
+                        <small>{row.realName}</small>
                       </span>
                     </Link>
                   </th>

@@ -194,14 +194,6 @@ export async function submitParticipationApplication(
         },
       });
 
-      await transaction.user.update({
-        where: { id: input.userId },
-        data: {
-          realNamePublic: input.realNamePublic,
-          realNamePublicConsentAt: input.realNamePublic ? now : null,
-        },
-      });
-
       await transaction.auditLog.create({
         data: {
           actorUserId: input.userId,
@@ -214,7 +206,6 @@ export async function submitParticipationApplication(
             tagLine: application.tagLine,
             primaryPosition: input.primaryPosition ?? null,
             secondaryPosition: input.secondaryPosition ?? null,
-            realNamePublic: input.realNamePublic,
           },
           requestId: input.requestId ?? null,
         },
@@ -313,8 +304,7 @@ export async function approveParticipationApplication(
         }
         if (
           application.verificationStatus !== VerificationStatus.VERIFIED ||
-          !application.puuid ||
-          !application.summonerId
+          !application.puuid
         ) {
           throw new ApplicationServiceError(
             "APPLICATION_VERIFICATION_REQUIRED",

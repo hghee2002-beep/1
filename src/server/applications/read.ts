@@ -29,7 +29,6 @@ export async function getApplicationPageData(userId: string) {
   const user = await db.user.findUnique({
     where: { id: userId },
     select: {
-      realNamePublic: true,
       participant: { select: { id: true } },
       applications: {
         orderBy: { createdAt: "desc" },
@@ -40,7 +39,6 @@ export async function getApplicationPageData(userId: string) {
   });
   return user
     ? {
-        realNamePublic: user.realNamePublic,
         participantId: user.participant?.id ?? null,
         latestApplication: user.applications[0] ?? null,
       }

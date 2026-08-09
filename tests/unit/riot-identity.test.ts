@@ -79,7 +79,6 @@ describe("Riot identity application contracts", () => {
         tagLine: "0217",
         primaryPosition: "MIDDLE",
         secondaryPosition: "MIDDLE",
-        realNamePublic: false,
       }).success,
     ).toBe(false);
     expect(
@@ -88,7 +87,6 @@ describe("Riot identity application contracts", () => {
         tagLine: "0217",
         primaryPosition: "MIDDLE",
         secondaryPosition: "JUNGLE",
-        realNamePublic: true,
       }).success,
     ).toBe(true);
   });

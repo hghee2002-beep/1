@@ -24,12 +24,15 @@ const testDatabaseUrl = process.env.TEST_DATABASE_URL;
 const databaseDescribe = testDatabaseUrl ? describe : describe.skip;
 
 class FixedIdentityResolver implements RiotIdentityResolver {
-  constructor(private readonly puuid: string) {}
+  constructor(
+    private readonly puuid: string,
+    private readonly summonerId: string | null = `SUMMONER_${puuid}`,
+  ) {}
 
   async resolve(identity: ParsedRiotId): Promise<ResolvedRiotIdentity> {
     return {
       puuid: this.puuid,
-      summonerId: `SUMMONER_${this.puuid}`,
+      summonerId: this.summonerId,
       gameName: identity.gameName,
       tagLine: identity.tagLine,
       profileIconId: 29,
@@ -117,7 +120,6 @@ databaseDescribe("Riot participation application and approval", () => {
       tagLine: "TEST",
       primaryPosition: "MIDDLE" as const,
       secondaryPosition: "JUNGLE" as const,
-      realNamePublic: true,
       requestId: randomUUID(),
     };
   }
@@ -136,7 +138,7 @@ databaseDescribe("Riot participation application and approval", () => {
       include: { participant: true, applications: true },
     });
     expect(stored.participant).toBeNull();
-    expect(stored.realNamePublic).toBe(true);
+    expect(stored.realNamePublic).toBe(false);
     expect(stored.applications).toHaveLength(1);
     expect(stored.applications[0]).toMatchObject({
       verificationStatus: VerificationStatus.VERIFIED,
@@ -231,6 +233,28 @@ databaseDescribe("Riot participation application and approval", () => {
         },
       }),
     ).resolves.toMatchObject({ actorUserId: adminId });
+  });
+
+  it("approves a PUUID-verified application without a legacy summoner ID", async () => {
+    const user = await createUser("puuid-only");
+    const created = await applications.submitParticipationApplication(
+      submitInput(user.id),
+      new FixedIdentityResolver(`PUUID_${randomUUID()}`, null),
+    );
+    const approved = await applications.approveParticipationApplication({
+      applicationId: created.id,
+      actorUserId: adminId,
+      reason: "PUUID 기준 계정 승인",
+      acknowledgeLateJoin: true,
+      requestId: randomUUID(),
+    });
+
+    await expect(
+      client.participant.findUniqueOrThrow({
+        where: { id: approved.participantId },
+        select: { summonerId: true },
+      }),
+    ).resolves.toEqual({ summonerId: null });
   });
 
   it("rolls back approval when a required foreign key fails", async () => {

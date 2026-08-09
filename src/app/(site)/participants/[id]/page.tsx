@@ -76,7 +76,7 @@ export default async function ParticipantPage({
             />
           </h1>
           <p>
-            {participant.realName ?? "실명 비공개"} ·{" "}
+            {participant.realName} ·{" "}
             {lastSyncedAt
               ? `최근 동기화 ${formatKstDateTime(lastSyncedAt)} · ${formatRelativeKorean(lastSyncedAt, now)}`
               : "동기화 시각 없음"}

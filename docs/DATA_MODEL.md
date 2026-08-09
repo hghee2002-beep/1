@@ -24,8 +24,8 @@
 | loginId | String | unique, case-normalized |
 | loginIdNormalized | String | unique |
 | realName | String | 참가 표시에 사용 |
-| realNamePublic | Boolean | default false, 공개 실명 동의 |
-| realNamePublicConsentAt | DateTime? | |
+| realNamePublic | Boolean | legacy 호환 필드, 공개 화면에서는 사용하지 않음 |
+| realNamePublicConsentAt | DateTime? | legacy 호환 필드 |
 | passwordHash | String | Argon2id |
 | role | UserRole | USER, ADMIN |
 | status | UserStatus | ACTIVE, LOCKED, DISABLED |

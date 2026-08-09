@@ -56,7 +56,6 @@ export const submitApplicationInputSchema = z
     ...riotIdentityFields,
     primaryPosition: optionalPosition,
     secondaryPosition: optionalPosition,
-    realNamePublic: z.boolean().default(false),
   })
   .superRefine((value, context) => {
     if (

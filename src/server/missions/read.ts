@@ -270,7 +270,7 @@ export async function getMissionLeaderboard(input?: {
               gameName: true,
               tagLine: true,
               user: {
-                select: { realName: true, realNamePublic: true },
+                select: { realName: true },
               },
             },
           },
@@ -311,9 +311,7 @@ export async function getMissionLeaderboard(input?: {
       participantId: row.participant.id,
       gameName: row.participant.gameName,
       tagLine: row.participant.tagLine,
-      realName: row.participant.user.realNamePublic
-        ? row.participant.user.realName
-        : null,
+      realName: row.participant.user.realName,
       score: scores.get(row.id) ?? 0,
       completed: row.missionAssignments.filter(
         (assignment) => assignment.state === MissionAssignmentState.COMPLETED,

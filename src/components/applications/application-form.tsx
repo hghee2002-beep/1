@@ -26,7 +26,6 @@ type ApplicationDefaults = {
   tagLine?: string | undefined;
   primaryPosition?: string | null | undefined;
   secondaryPosition?: string | null | undefined;
-  realNamePublic: boolean;
 };
 
 function isVerifiedAccount(value: unknown): value is VerifiedAccount {
@@ -174,7 +173,6 @@ export function ApplicationForm({
           tagLine,
           primaryPosition: formData.get("primaryPosition"),
           secondaryPosition: formData.get("secondaryPosition"),
-          realNamePublic: formData.get("realNamePublic") === "on",
         }),
       });
       const payload = await readPayload(response);
@@ -310,14 +308,6 @@ export function ApplicationForm({
           <FieldErrors name="secondaryPosition" fields={fields} />
         </label>
       </div>
-      <label className="check-label realname-consent">
-        <input
-          name="realNamePublic"
-          type="checkbox"
-          defaultChecked={defaults.realNamePublic}
-        />
-        공개 순위와 프로필에 실명을 표시합니다.
-      </label>
       <button
         className="button-primary button-full"
         type="submit"
