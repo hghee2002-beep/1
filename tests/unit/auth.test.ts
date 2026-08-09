@@ -13,6 +13,7 @@ import {
   verifySessionToken,
 } from "@/features/auth/session-token";
 import {
+  changePasswordInputSchema,
   loginInputSchema,
   normalizeLoginId,
   signupInputSchema,
@@ -47,6 +48,42 @@ describe("authentication domain rules", () => {
         expect.objectContaining({ path: ["passwordConfirm"] }),
       ]),
     );
+  });
+
+  it("accepts 4-character signup passwords and rejects shorter values", () => {
+    expect(
+      signupInputSchema.safeParse({
+        loginId: "user-04",
+        displayName: "네 글자 사용자",
+        password: "1234",
+        passwordConfirm: "1234",
+      }).success,
+    ).toBe(true);
+
+    const result = signupInputSchema.safeParse({
+      loginId: "user-03",
+      displayName: "세 글자 사용자",
+      password: "123",
+      passwordConfirm: "123",
+    });
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(result.error.issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          path: ["password"],
+          message: "비밀번호는 4자 이상이어야 합니다.",
+        }),
+      ]),
+    );
+
+    expect(
+      changePasswordInputSchema.safeParse({
+        currentPassword: "current password 2026",
+        newPassword: "1234",
+        newPasswordConfirm: "1234",
+      }).success,
+    ).toBe(false);
   });
 
   it("hashes and verifies passwords with Argon2id without storing plaintext", async () => {

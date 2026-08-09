@@ -2,7 +2,8 @@ import { z } from "zod";
 
 export const LOGIN_ID_MIN_LENGTH = 4;
 export const LOGIN_ID_MAX_LENGTH = 32;
-export const PASSWORD_MIN_LENGTH = 12;
+export const SIGNUP_PASSWORD_MIN_LENGTH = 4;
+export const PASSWORD_CHANGE_MIN_LENGTH = 12;
 export const PASSWORD_MAX_LENGTH = 128;
 
 const LOGIN_ID_PATTERN = /^[a-z0-9._-]+$/u;
@@ -39,20 +40,22 @@ const loginIdField = z
     }
   });
 
-const passwordField = z
-  .string({ error: "비밀번호를 입력해 주세요." })
-  .min(PASSWORD_MIN_LENGTH, {
-    error: `비밀번호는 ${PASSWORD_MIN_LENGTH}자 이상이어야 합니다.`,
-  })
-  .max(PASSWORD_MAX_LENGTH, {
-    error: `비밀번호는 ${PASSWORD_MAX_LENGTH}자 이하여야 합니다.`,
-  })
-  .refine((value) => !value.includes("\u0000"), {
-    error: "비밀번호에 사용할 수 없는 문자가 포함되어 있습니다.",
-  })
-  .refine((value) => value.trim().length > 0, {
-    error: "공백으로만 된 비밀번호는 사용할 수 없습니다.",
-  });
+function passwordField(minLength: number) {
+  return z
+    .string({ error: "비밀번호를 입력해 주세요." })
+    .min(minLength, {
+      error: `비밀번호는 ${minLength}자 이상이어야 합니다.`,
+    })
+    .max(PASSWORD_MAX_LENGTH, {
+      error: `비밀번호는 ${PASSWORD_MAX_LENGTH}자 이하여야 합니다.`,
+    })
+    .refine((value) => !value.includes("\u0000"), {
+      error: "비밀번호에 사용할 수 없는 문자가 포함되어 있습니다.",
+    })
+    .refine((value) => value.trim().length > 0, {
+      error: "공백으로만 된 비밀번호는 사용할 수 없습니다.",
+    });
+}
 
 export const signupInputSchema = z
   .object({
@@ -66,7 +69,7 @@ export const signupInputSchema = z
           .min(2, { error: "표시 이름은 2자 이상이어야 합니다." })
           .max(40, { error: "표시 이름은 40자 이하여야 합니다." }),
       ),
-    password: passwordField,
+    password: passwordField(SIGNUP_PASSWORD_MIN_LENGTH),
     passwordConfirm: z.string({ error: "비밀번호를 한 번 더 입력해 주세요." }),
   })
   .superRefine((value, context) => {
@@ -109,7 +112,7 @@ export const changePasswordInputSchema = z
       .max(PASSWORD_MAX_LENGTH, {
         error: "현재 비밀번호가 올바르지 않습니다.",
       }),
-    newPassword: passwordField,
+    newPassword: passwordField(PASSWORD_CHANGE_MIN_LENGTH),
     newPasswordConfirm: z.string({
       error: "새 비밀번호를 한 번 더 입력해 주세요.",
     }),

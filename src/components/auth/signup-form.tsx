@@ -126,7 +126,9 @@ export function SignupForm() {
             name="password"
             type="password"
             autoComplete="new-password"
-            placeholder="12자 이상"
+            minLength={4}
+            maxLength={128}
+            placeholder="4자 이상"
             aria-invalid={fields.password?.length ? true : undefined}
             aria-describedby={describedBy(fields, "password")}
             required
@@ -143,6 +145,8 @@ export function SignupForm() {
             name="passwordConfirm"
             type="password"
             autoComplete="new-password"
+            minLength={4}
+            maxLength={128}
             placeholder="한 번 더 입력"
             aria-invalid={fields.passwordConfirm?.length ? true : undefined}
             aria-describedby={describedBy(fields, "passwordConfirm")}
