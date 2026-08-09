@@ -64,6 +64,18 @@ DB 명령은 `db:generate`, `db:migrate`, `db:seed`, `db:studio`처럼 일관된
 - 생성된 임시 파일, dead code, 주석 처리한 구 구현을 남기지 않는다.
 - TODO는 담당 이유와 완료 조건이 명확할 때만 남긴다.
 
+### 이 저장소의 상시 GitHub·배포 권한
+
+사용자는 이 저장소에서 요청한 코드·문서 변경에 대해 다음 작업을 매 세션 별도 확인 없이 진행하도록 상시 승인했다.
+
+- 변경 범위에 맞는 검증이 통과하면 현재 `main`에 커밋하고 `origin/main`으로 push한다.
+- push 뒤 연결된 Vercel Git 배포가 시작되었는지 확인하고, 배포가 `READY`가 될 때까지 확인한다.
+- 운영 별칭 `https://1-three-sable.vercel.app`의 health check와 변경 범위의 핵심 화면 또는 API를 smoke test한다.
+- 커밋 메시지는 변경 내용을 설명하는 conventional commit 형식을 사용한다.
+- 검증이 실패하거나 배포가 실패하면 성공으로 보고하지 않으며, 원인을 해결할 수 있는 범위까지 처리한 뒤 상태를 보고한다.
+
+이 상시 승인은 production DB migration·seed·데이터 수정, secret/API key 교체, 유료 리소스 생성, force push, 이력 재작성, 데이터 삭제에는 적용되지 않는다. 이 작업들은 현재 요청에서 별도 승인이 있어야 한다. 다른 사용자 변경과 충돌하거나 `main`이 예상과 다르면 덮어쓰지 말고 안전하게 중단해 보고한다.
+
 ## 6. 아키텍처 경계
 
 - UI 컴포넌트에서 Prisma 또는 Riot SDK를 직접 호출하지 않는다.
