@@ -2357,34 +2357,6 @@ svg {
   height: 15px;
   accent-color: var(--amber);
 }
-.consent-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.7rem 1rem;
-  flex-wrap: wrap;
-}
-.consent-link {
-  color: var(--amber);
-  font-size: 0.65rem;
-  font-weight: 750;
-  text-decoration: underline;
-  text-underline-offset: 0.2rem;
-}
-.consent-link:hover {
-  color: var(--text-primary);
-}
-.consent-box {
-  display: grid;
-  gap: 0.7rem;
-  border: 1px solid var(--line);
-  padding: 0.85rem;
-}
-.consent-box legend {
-  padding: 0 0.3rem;
-  color: var(--text-muted);
-  font-size: 0.62rem;
-}
 .auth-alternate {
   margin: 1.4rem 0 0;
   color: var(--text-muted);

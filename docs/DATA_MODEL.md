@@ -62,7 +62,7 @@
 
 ## LegalConsent
 
-게시된 법적 문서에 대한 동의를 append-only로 보존한다.
+관리자가 별도 동의를 수집하는 경우 게시된 법적 문서에 대한 동의를 append-only로 보존한다. 회원가입 자체는 법적 문서 게시 여부나 동의를 요구하지 않는다(D-033).
 
 | 필드 | 타입 | 규칙 |
 |---|---|---|
@@ -75,7 +75,7 @@
 
 unique(userId, legalDocumentId)
 
-User의 `termsAcceptedAt`과 `privacyAcceptedAt`은 최신 상태 조회용 cache로만 사용할 수 있으며, 권위 있는 동의 버전은 LegalConsent 이력이다.
+User의 `termsAcceptedAt`과 `privacyAcceptedAt`은 별도 동의가 수집된 경우의 최신 상태 조회용 cache로만 사용할 수 있으며, 권위 있는 동의 버전은 LegalConsent 이력이다. 신규 계정에서는 두 필드가 null이다.
 
 ## LoginAttempt
 

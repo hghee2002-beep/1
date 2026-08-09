@@ -19,9 +19,9 @@ export function AuthFrame({
       <section className="auth-context">
         <p className="section-label">DELUXE SOLO QUEUE</p>
         <h1>
-          디럭스 솔랭대결
+          디럭스 솔랭내기
         </h1>
-      
+        <p>2026 썸머시즌</p>
       </section>
       <section className="auth-panel">
         <p className="section-label">{eyebrow}</p>
@@ -31,10 +31,6 @@ export function AuthFrame({
         <p className="auth-alternate">
           {alternate.text} <Link href={alternate.href}>{alternate.label}</Link>
         </p>
-        <small className="demo-caption">
-          비밀번호는 Argon2id 해시로만 저장되며 브라우저 저장소에 인증 토큰을
-          남기지 않습니다.
-        </small>
       </section>
     </div>
   );

@@ -1,11 +1,6 @@
 import "server-only";
 
-import {
-  LegalDocumentStatus,
-  LegalDocumentType,
-  UserRole,
-  UserStatus,
-} from "@/generated/prisma/client";
+import { UserRole, UserStatus } from "@/generated/prisma/client";
 
 import {
   hashPassword,
@@ -33,69 +28,20 @@ function hasPrismaErrorCode(error: unknown, code: string) {
   );
 }
 
-export async function registerUser(input: SignupInput, now = new Date()) {
+export async function registerUser(input: SignupInput) {
   const passwordHash = await hashPassword(input.password);
 
   try {
-    return await db.$transaction(async (transaction) => {
-      const legalDocuments = await transaction.legalDocument.findMany({
-        where: {
-          type: {
-            in: [LegalDocumentType.TERMS, LegalDocumentType.PRIVACY],
-          },
-          status: LegalDocumentStatus.PUBLISHED,
-          effectiveAt: { lte: now },
-          publishedAt: { not: null, lte: now },
-        },
-        orderBy: { version: "desc" },
-        select: { id: true, type: true },
-      });
-      const terms = legalDocuments.find(
-        (document) => document.type === LegalDocumentType.TERMS,
-      );
-      const privacy = legalDocuments.find(
-        (document) => document.type === LegalDocumentType.PRIVACY,
-      );
-
-      if (!terms || !privacy) {
-        throw new AuthServiceError(
-          "LEGAL_DOCUMENT_UNAVAILABLE",
-          "현재 가입에 필요한 법적 문서가 게시되어 있지 않습니다.",
-        );
-      }
-
-      const user = await transaction.user.create({
-        data: {
-          loginId: input.loginId,
-          loginIdNormalized: input.loginIdNormalized,
-          realName: input.displayName,
-          passwordHash,
-          role: UserRole.USER,
-          status: UserStatus.ACTIVE,
-          termsAcceptedAt: now,
-          privacyAcceptedAt: now,
-        },
-        select: { id: true, loginId: true },
-      });
-
-      await transaction.legalConsent.createMany({
-        data: [
-          {
-            userId: user.id,
-            legalDocumentId: terms.id,
-            acceptedAt: now,
-            source: "SIGNUP",
-          },
-          {
-            userId: user.id,
-            legalDocumentId: privacy.id,
-            acceptedAt: now,
-            source: "SIGNUP",
-          },
-        ],
-      });
-
-      return user;
+    return await db.user.create({
+      data: {
+        loginId: input.loginId,
+        loginIdNormalized: input.loginIdNormalized,
+        realName: input.displayName,
+        passwordHash,
+        role: UserRole.USER,
+        status: UserStatus.ACTIVE,
+      },
+      select: { id: true, loginId: true },
     });
   } catch (error) {
     if (error instanceof AuthServiceError) throw error;

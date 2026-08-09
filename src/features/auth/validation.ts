@@ -68,12 +68,6 @@ export const signupInputSchema = z
       ),
     password: passwordField,
     passwordConfirm: z.string({ error: "비밀번호를 한 번 더 입력해 주세요." }),
-    termsAccepted: z.literal(true, {
-      error: "이용약관 동의가 필요합니다.",
-    }),
-    privacyAccepted: z.literal(true, {
-      error: "개인정보 수집·이용 동의가 필요합니다.",
-    }),
   })
   .superRefine((value, context) => {
     if (value.password !== value.passwordConfirm) {

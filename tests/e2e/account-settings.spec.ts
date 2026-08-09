@@ -17,8 +17,6 @@ async function signup(page: Page, loginId: string) {
   await page.getByLabel("표시 이름").fill("계정 설정 브라우저 사용자");
   await page.getByLabel("비밀번호", { exact: true }).fill(initialPassword);
   await page.getByLabel("비밀번호 확인").fill(initialPassword);
-  await page.getByLabel(/게시 중인 이용약관/u).check();
-  await page.getByLabel(/게시 중인 개인정보/u).check();
   await page.getByRole("button", { name: "계정 만들기" }).click();
   await expect(page).toHaveURL(/\/login\?registered=1/u);
 }

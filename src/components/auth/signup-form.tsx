@@ -1,7 +1,6 @@
 "use client";
 
 import { BadgeCheck, LockKeyhole, UserRound } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
@@ -62,8 +61,6 @@ export function SignupForm() {
           displayName: formData.get("displayName"),
           password: formData.get("password"),
           passwordConfirm: formData.get("passwordConfirm"),
-          termsAccepted: formData.get("termsAccepted") === "on",
-          privacyAccepted: formData.get("privacyAccepted") === "on",
         }),
       });
       const payload: unknown = await response.json();
@@ -163,46 +160,6 @@ export function SignupForm() {
         </span>
         <FieldErrors name="passwordConfirm" fields={fields} />
       </label>
-      <fieldset className="consent-box field-wide">
-        <legend>필수 동의</legend>
-        <div className="consent-row">
-          <label className="check-label" htmlFor="termsAccepted">
-            <input
-              id="termsAccepted"
-              name="termsAccepted"
-              type="checkbox"
-              aria-invalid={fields.termsAccepted?.length ? true : undefined}
-              aria-describedby={describedBy(fields, "termsAccepted")}
-              required
-            />
-            게시 중인 이용약관에 동의합니다.
-          </label>
-          <Link className="consent-link" href="/rules#terms">
-            이용약관 전문 보기
-          </Link>
-        </div>
-        <FieldErrors name="termsAccepted" fields={fields} />
-        <div className="consent-row">
-          <label className="check-label" htmlFor="privacyAccepted">
-            <input
-              id="privacyAccepted"
-              name="privacyAccepted"
-              type="checkbox"
-              aria-invalid={fields.privacyAccepted?.length ? true : undefined}
-              aria-describedby={describedBy(fields, "privacyAccepted")}
-              required
-            />
-            게시 중인 개인정보 수집·이용 정책에 동의합니다.
-          </label>
-          <Link className="consent-link" href="/rules#privacy">
-            개인정보 정책 전문 보기
-          </Link>
-        </div>
-        <FieldErrors name="privacyAccepted" fields={fields} />
-        <small>
-          동의한 문서의 정확한 게시 버전과 시각이 계정에 보존됩니다.
-        </small>
-      </fieldset>
       <button
         className="button-primary button-full field-wide"
         type="submit"

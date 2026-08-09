@@ -309,3 +309,10 @@
 - 결정: 대상 참가 경기와 연결된 `MissionProgressEvent`가 하나라도 있으면 관리자 경기 무효화를 mutation 시작 전에 `SCORING_CONFLICT`로 차단한다. 미션 효과가 없는 경기는 기존처럼 append-only score reversal과 AuditLog를 만든다. 영향 경기의 교정은 원본 보존, 새 evaluator version, signed correction event와 대사 절차가 준비된 운영 경로로만 수행한다.
 - 대안과 기각 이유: 미션 event나 completion 원장을 delete/update하면 감사 이력이 깨진다. 메인 점수만 먼저 뒤집고 미션을 나중에 고치는 방식은 그 사이 잘못된 순위·완료 보상·스냅샷을 노출한다.
 - 데이터/마이그레이션 영향: schema migration은 없다. 무효화 전 존재 검사와 통합 테스트를 추가한다. 범용 미션 rebuild/correction workflow가 구현되기 전까지 이 차단은 알려진 운영 제한이다.
+
+## D-033. 회원가입과 법적 문서 동의의 분리
+
+- 배경: 소규모 비공개 대회 계정 생성에서 이용약관·개인정보 동의 UI와 게시 문서 존재 여부가 가입을 불필요하게 차단한다.
+- 결정: 회원가입은 이용약관·개인정보 동의 입력을 받지 않고, 게시된 `TERMS`·`PRIVACY` 문서의 존재 여부를 검사하지 않는다. 신규 계정 생성 시 `LegalConsent`를 만들거나 `termsAcceptedAt`·`privacyAcceptedAt`을 채우지 않는다. `/rules`의 법적 문서 게시·조회 기능과 기존 동의 이력은 보존한다. 이 결정은 가입 시 동의를 요구하던 D-025와 D-026의 해당 부분을 대체한다.
+- 대안과 기각 이유: UI만 숨기고 서버 검증을 유지하면 문서 미게시 환경에서 가입이 계속 실패하며, 클라이언트가 보이지 않는 동의 값을 자동 전송하면 실제 동의 없이 동의 이력이 생성된다.
+- 데이터/마이그레이션 영향: 기존 nullable 필드와 `LegalConsent` 테이블을 유지하므로 schema migration은 없다. 신규 가입자의 동의 시각은 null이고 동의 행은 생성되지 않는다.

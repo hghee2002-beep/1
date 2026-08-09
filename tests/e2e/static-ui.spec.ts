@@ -50,16 +50,13 @@ test("all public, participant, and authentication routes render without console 
   expect(errors).toEqual([]);
 });
 
-test("signup consent links open the exact published legal sections", async ({
+test("signup omits legal consent controls while rules keep published documents", async ({
   page,
 }) => {
   await page.goto("/signup");
-  await expect(
-    page.getByRole("link", { name: "이용약관 전문 보기", exact: true }),
-  ).toHaveAttribute("href", "/rules#terms");
-  await expect(
-    page.getByRole("link", { name: "개인정보 정책 전문 보기", exact: true }),
-  ).toHaveAttribute("href", "/rules#privacy");
+  await expect(page.getByText("필수 동의", { exact: true })).toHaveCount(0);
+  await expect(page.getByLabel(/게시 중인 이용약관/u)).toHaveCount(0);
+  await expect(page.getByLabel(/게시 중인 개인정보/u)).toHaveCount(0);
 
   await page.goto("/rules");
   const terms = page.locator("#terms");

@@ -51,14 +51,12 @@ databaseDescribe("credentials authentication and database sessions", () => {
     await database?.db.$disconnect();
   });
 
-  it("registers normalized login IDs with versioned legal consent", async () => {
+  it("registers normalized login IDs without requiring legal documents", async () => {
     const input = validation.signupInputSchema.parse({
       loginId: loginId.toUpperCase(),
       displayName: "통합 인증 사용자",
       password,
       passwordConfirm: password,
-      termsAccepted: true,
-      privacyAccepted: true,
     });
     const created = await accounts.registerUser(input);
     userId = created.id;
@@ -69,9 +67,9 @@ databaseDescribe("credentials authentication and database sessions", () => {
     });
     expect(stored.loginIdNormalized).toBe(loginId);
     expect(stored.passwordHash).not.toContain(password);
-    expect(
-      stored.legalConsents.map((item) => item.legalDocument.type).sort(),
-    ).toEqual(["PRIVACY", "TERMS"]);
+    expect(stored.termsAcceptedAt).toBeNull();
+    expect(stored.privacyAcceptedAt).toBeNull();
+    expect(stored.legalConsents).toEqual([]);
 
     await expect(accounts.registerUser(input)).rejects.toMatchObject({
       code: "LOGIN_ID_UNAVAILABLE",

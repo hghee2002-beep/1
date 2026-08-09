@@ -37,8 +37,6 @@ describe("authentication domain rules", () => {
       displayName: "테스트 사용자",
       password: "correct horse battery staple",
       passwordConfirm: "different password value",
-      termsAccepted: true,
-      privacyAccepted: true,
     });
 
     expect(result.success).toBe(false);
